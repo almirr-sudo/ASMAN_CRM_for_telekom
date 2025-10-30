@@ -1,0 +1,43 @@
+# Django и основные библиотеки
+Django==5.0.0
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.1
+
+# База данных
+psycopg2-binary==2.9.9
+
+# Фильтрация и поиск
+django-filter==23.5
+
+# CORS headers
+django-cors-headers==4.3.1
+
+# Задачи и очереди
+celery==5.3.4
+redis==5.0.1
+
+# Работа с переменными окружения
+python-decouple==3.8
+
+# Работа с CSV/Excel
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+
+# Валидация телефонов
+phonenumbers==8.13.26
+
+# Работа с датами
+python-dateutil==2.8.2
+
+# Тестирование
+pytest==7.4.3
+pytest-django==4.7.0
+factory-boy==3.3.0
+
+# Code quality
+flake8==6.1.0
+black==23.12.1
+
+# Разработка
+django-debug-toolbar==4.2.0
+ipython==8.18.1
