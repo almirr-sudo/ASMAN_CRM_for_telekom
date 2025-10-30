@@ -4,7 +4,8 @@ djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
 
 # База данных
-psycopg2-binary==2.9.9
+# psycopg2-binary==2.9.9  # Закомментировано для Windows, используем SQLite для разработки
+# Для продакшена с PostgreSQL раскомментируйте или установите psycopg[binary]
 
 # Фильтрация и поиск
 django-filter==23.5
