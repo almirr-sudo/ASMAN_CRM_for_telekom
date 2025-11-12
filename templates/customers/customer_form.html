@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Редактирование абонента{% else %}Новый абонент{% endif %} - Телеком CRM{% endblock %}
+
+{% block breadcrumbs %}
+<nav class="flex border-b border-gray-200 bg-white" aria-label="Breadcrumb">
+    <ol role="list" class="mx-auto flex w-full max-w-screen-xl space-x-4 px-4 sm:px-6 lg:px-8">
+        <li class="flex">
+            <div class="flex items-center">
+                <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </li>
+        <li class="flex">
+            <div class="flex items-center">
+                <svg class="h-full w-6 flex-shrink-0 text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor">
+                    <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+                </svg>
+                <a href="{% url 'customer_list' %}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">Абоненты</a>
+            </div>
+        </li>
+        <li class="flex">
+            <div class="flex items-center">
+                <svg class="h-full w-6 flex-shrink-0 text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor">
+                    <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+                </svg>
+                <span class="ml-4 text-sm font-medium text-gray-500">
+                    {% if object %}Редактирование{% else %}Новый абонент{% endif %}
+                </span>
+            </div>
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block page_header %}
+<div class="bg-white shadow">
+    <div class="px-4 sm:px-6 lg:mx-auto lg:max-w-screen-xl lg:px-8">
+        <div class="py-6 md:flex md:items-center md:justify-between">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                    {% if object %}
+                        Редактирование абонента: {{ object.firstname }} {{ object.lastname }}
+                    {% else %}
+                        Новый абонент
+                    {% endif %}
+                </h1>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-8">
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Основная информация -->
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Основная информация</h3>
+
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <!-- Имя -->
+                    <div>
+                        <label for="id_firstname" class="block text-sm font-medium leading-6 text-gray-900">
+                            Имя <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="firstname" id="id_firstname" required
+                               value="{{ form.firstname.value|default:'' }}"
+                               class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6
+                               {% if form.firstname.errors %}ring-red-300 focus:ring-red-500{% endif %}">
+                        {% if form.firstname.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.firstname.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Фамилия -->
+                    <div>
+                        <label for="id_lastname" class="block text-sm font-medium leading-6 text-gray-900">
+                            Фамилия <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="lastname" id="id_lastname" required
+                               value="{{ form.lastname.value|default:'' }}"
+                               class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6
+                               {% if form.lastname.errors %}ring-red-300 focus:ring-red-500{% endif %}">
+                        {% if form.lastname.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.lastname.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Телефон -->
+                    <div>
+                        <label for="id_phone" class="block text-sm font-medium leading-6 text-gray-900">
+                            Телефон <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" name="phone" id="id_phone" required
+                               value="{{ form.phone.value|default:'' }}"
+                               placeholder="+7 (XXX) XXX-XX-XX"
+                               class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6
+                               {% if form.phone.errors %}ring-red-300 focus:ring-red-500{% endif %}">
+                        {% if form.phone.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="id_email" class="block text-sm font-medium leading-6 text-gray-900">
+                            Email
+                        </label>
+                        <input type="email" name="email" id="id_email"
+                               value="{{ form.email.value|default:'' }}"
+                               placeholder="example@email.com"
+                               class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6
+                               {% if form.email.errors %}ring-red-300 focus:ring-red-500{% endif %}">
+                        {% if form.email.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Статус -->
+                    <div>
+                        <label for="id_status" class="block text-sm font-medium leading-6 text-gray-900">
+                            Статус <span class="text-red-500">*</span>
+                        </label>
+                        <select name="status" id="id_status" required
+                                class="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm sm:leading-6
+                                {% if form.status.errors %}ring-red-300 focus:ring-red-500{% endif %}">
+                            <option value="active" {% if form.status.value == 'active' %}selected{% endif %}>Активный</option>
+                            <option value="suspended" {% if form.status.value == 'suspended' %}selected{% endif %}>Приостановлен</option>
+                            <option value="blocked" {% if form.status.value == 'blocked' %}selected{% endif %}>Заблокирован</option>
+                        </select>
+                        {% if form.status.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Документы -->
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Документы</h3>
+
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <!-- Тип документа -->
+                    <div>
+                        <label for="id_document_type" class="block text-sm font-medium leading-6 text-gray-900">
+                            Тип документа <span class="text-red-500">*</span>
+                        </label>
+                        <select name="document_type" id="id_document_type" required
+                                class="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm sm:leading-6
+                                {% if form.document_type.errors %}ring-red-300 focus:ring-red-500{% endif %}">
+                            <option value="passport" {% if form.document_type.value == 'passport' %}selected{% endif %}>Паспорт</option>
+                            <option value="id_card" {% if form.document_type.value == 'id_card' %}selected{% endif %}>ID карта</option>
+                            <option value="driver_license" {% if form.document_type.value == 'driver_license' %}selected{% endif %}>Водительское удостоверение</option>
+                        </select>
+                        {% if form.document_type.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.document_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Номер документа -->
+                    <div>
+                        <label for="id_document_number" class="block text-sm font-medium leading-6 text-gray-900">
+                            Номер документа <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="document_number" id="id_document_number" required
+                               value="{{ form.document_number.value|default:'' }}"
+                               class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6
+                               {% if form.document_number.errors %}ring-red-300 focus:ring-red-500{% endif %}">
+                        {% if form.document_number.errors %}
+                        <p class="mt-2 text-sm text-red-600">{{ form.document_number.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Адрес -->
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Адрес проживания</h3>
+
+                <div>
+                    <label for="id_address" class="block text-sm font-medium leading-6 text-gray-900">
+                        Адрес
+                    </label>
+                    <textarea name="address" id="id_address" rows="3"
+                              class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6
+                              {% if form.address.errors %}ring-red-300 focus:ring-red-500{% endif %}"
+                              placeholder="Город, улица, дом, квартира">{{ form.address.value|default:'' }}</textarea>
+                    {% if form.address.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="flex justify-end space-x-3">
+            <a href="{% if object %}{% url 'customer_detail' object.id %}{% else %}{% url 'customer_list' %}{% endif %}"
+               class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                Отмена
+            </a>
+            <button type="submit"
+                    class="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                {% if object %}Сохранить изменения{% else %}Создать абонента{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

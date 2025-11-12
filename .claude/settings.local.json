@@ -13,7 +13,11 @@
       "Bash(ping:*)",
       "Bash(nul)",
       "Bash(curl:*)",
-      "Bash(if exist nul del /f nul)"
+      "Bash(if exist nul del /f nul)",
+      "Bash(if not exist \"templates\\customers\" mkdir \"templates\\customers\")",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(venvScriptspython.exe manage.py runserver)",
+      "Bash(./venv/Scripts/python.exe:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block title %}Абоненты - Телеком CRM{% endblock %}
+
+{% block breadcrumbs %}
+<nav class="flex border-b border-gray-200 bg-white" aria-label="Breadcrumb">
+    <ol role="list" class="mx-auto flex w-full max-w-screen-xl space-x-4 px-4 sm:px-6 lg:px-8">
+        <li class="flex">
+            <div class="flex items-center">
+                <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </li>
+        <li class="flex">
+            <div class="flex items-center">
+                <svg class="h-full w-6 flex-shrink-0 text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor">
+                    <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+                </svg>
+                <span class="ml-4 text-sm font-medium text-gray-500">Абоненты</span>
+            </div>
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block page_header %}
+<div class="bg-white shadow">
+    <div class="px-4 sm:px-6 lg:mx-auto lg:max-w-screen-xl lg:px-8">
+        <div class="py-6 md:flex md:items-center md:justify-between">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                    Абоненты
+                </h1>
+            </div>
+            <div class="mt-4 flex md:ml-4 md:mt-0">
+                <a href="{% url 'customer_create' %}" class="ml-3 inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                    </svg>
+                    Добавить абонента
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Статистика -->
+    <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt class="truncate text-sm font-medium text-gray-500">Всего абонентов</dt>
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_count|default:0 }}</dd>
+        </div>
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt class="truncate text-sm font-medium text-gray-500">Активных</dt>
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-green-600">{{ active_count|default:0 }}</dd>
+        </div>
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt class="truncate text-sm font-medium text-gray-500">Приостановлено</dt>
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">{{ suspended_count|default:0 }}</dd>
+        </div>
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt class="truncate text-sm font-medium text-gray-500">Заблокировано</dt>
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-red-600">{{ blocked_count|default:0 }}</dd>
+        </div>
+    </div>
+
+    <!-- Фильтры и поиск -->
+    <div class="mb-6 rounded-lg bg-white p-6 shadow">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <!-- Поиск -->
+                <div class="sm:col-span-1">
+                    <label for="search" class="block text-sm font-medium leading-6 text-gray-900">Поиск</label>
+                    <input type="text" name="search" id="search" value="{{ current_search }}"
+                           placeholder="Имя, телефон, email..."
+                           class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                </div>
+
+                <!-- Фильтр по статусу -->
+                <div>
+                    <label for="status" class="block text-sm font-medium leading-6 text-gray-900">Статус</label>
+                    <select name="status" id="status"
+                            class="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm sm:leading-6">
+                        <option value="">Все статусы</option>
+                        <option value="active" {% if current_status == 'active' %}selected{% endif %}>Активный</option>
+                        <option value="suspended" {% if current_status == 'suspended' %}selected{% endif %}>Приостановлен</option>
+                        <option value="blocked" {% if current_status == 'blocked' %}selected{% endif %}>Заблокирован</option>
+                    </select>
+                </div>
+
+                <!-- Фильтр по типу документа -->
+                <div>
+                    <label for="document_type" class="block text-sm font-medium leading-6 text-gray-900">Тип документа</label>
+                    <select name="document_type" id="document_type"
+                            class="mt-2 block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm sm:leading-6">
+                        <option value="">Все типы</option>
+                        <option value="passport" {% if current_document_type == 'passport' %}selected{% endif %}>Паспорт</option>
+                        <option value="id_card" {% if current_document_type == 'id_card' %}selected{% endif %}>ID карта</option>
+                        <option value="driver_license" {% if current_document_type == 'driver_license' %}selected{% endif %}>Водительское удостоверение</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'customer_list' %}" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    Сбросить
+                </a>
+                <button type="submit" class="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500">
+                    Применить фильтры
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Таблица абонентов -->
+    <div class="overflow-hidden bg-white shadow sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-300">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">ID</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">ФИО</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Телефон</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Документ</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Статус</th>
+                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Дата регистрации</th>
+                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                        <span class="sr-only">Действия</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 bg-white">
+                {% for customer in customers %}
+                <tr class="hover:bg-gray-50">
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                        {{ customer.id }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                        <a href="{% url 'customer_detail' customer.id %}" class="font-medium text-primary-600 hover:text-primary-500">
+                            {{ customer.firstname }} {{ customer.lastname }}
+                        </a>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {{ customer.phone|default:"-" }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {{ customer.email|default:"-" }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {{ customer.get_document_type_display }} {{ customer.document_number }}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm">
+                        {% if customer.status == 'active' %}
+                        <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                            Активный
+                        </span>
+                        {% elif customer.status == 'suspended' %}
+                        <span class="inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold leading-5 text-yellow-800">
+                            Приостановлен
+                        </span>
+                        {% elif customer.status == 'blocked' %}
+                        <span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">
+                            Заблокирован
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {{ customer.created_at|date:"d.m.Y H:i" }}
+                    </td>
+                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <a href="{% url 'customer_detail' customer.id %}" class="text-primary-600 hover:text-primary-900 mr-4">
+                            Просмотр
+                        </a>
+                        <a href="{% url 'customer_edit' customer.id %}" class="text-primary-600 hover:text-primary-900">
+                            Редактировать
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="py-12 text-center text-sm text-gray-500">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-semibold text-gray-900">Абоненты не найдены</h3>
+                        <p class="mt-1 text-sm text-gray-500">Попробуйте изменить параметры фильтрации</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+    <nav class="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+        <div class="flex flex-1 justify-between sm:hidden">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_document_type %}&document_type={{ current_document_type }}{% endif %}"
+               class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Предыдущая
+            </a>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_document_type %}&document_type={{ current_document_type }}{% endif %}"
+               class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Следующая
+            </a>
+            {% endif %}
+        </div>
+        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Показано <span class="font-medium">{{ page_obj.start_index }}</span> -
+                    <span class="font-medium">{{ page_obj.end_index }}</span> из
+                    <span class="font-medium">{{ paginator.count }}</span> результатов
+                </p>
+            </div>
+            <div>
+                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_document_type %}&document_type={{ current_document_type }}{% endif %}"
+                       class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        <span class="sr-only">Предыдущая</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    {% endif %}
+
+                    <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300">
+                        {{ page_obj.number }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_document_type %}&document_type={{ current_document_type }}{% endif %}"
+                       class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        <span class="sr-only">Следующая</span>
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

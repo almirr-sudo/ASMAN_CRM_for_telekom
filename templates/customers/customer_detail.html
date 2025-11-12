@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ customer.firstname }} {{ customer.lastname }} - Телеком CRM{% endblock %}
+
+{% block breadcrumbs %}
+<nav class="flex border-b border-gray-200 bg-white" aria-label="Breadcrumb">
+    <ol role="list" class="mx-auto flex w-full max-w-screen-xl space-x-4 px-4 sm:px-6 lg:px-8">
+        <li class="flex">
+            <div class="flex items-center">
+                <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
+        </li>
+        <li class="flex">
+            <div class="flex items-center">
+                <svg class="h-full w-6 flex-shrink-0 text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor">
+                    <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+                </svg>
+                <a href="{% url 'customer_list' %}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">Абоненты</a>
+            </div>
+        </li>
+        <li class="flex">
+            <div class="flex items-center">
+                <svg class="h-full w-6 flex-shrink-0 text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor">
+                    <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+                </svg>
+                <span class="ml-4 text-sm font-medium text-gray-500">{{ customer.firstname }} {{ customer.lastname }}</span>
+            </div>
+        </li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block page_header %}
+<div class="bg-white shadow">
+    <div class="px-4 sm:px-6 lg:mx-auto lg:max-w-screen-xl lg:px-8">
+        <div class="py-6 md:flex md:items-center md:justify-between">
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
+                        {{ customer.firstname }} {{ customer.lastname }}
+                    </h1>
+                    <span class="ml-4 inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                        {% if customer.status == 'active' %}bg-green-100 text-green-800
+                        {% elif customer.status == 'suspended' %}bg-yellow-100 text-yellow-800
+                        {% elif customer.status == 'blocked' %}bg-red-100 text-red-800{% endif %}">
+                        {% if customer.status == 'active' %}Активный
+                        {% elif customer.status == 'suspended' %}Приостановлен
+                        {% elif customer.status == 'blocked' %}Заблокирован{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="mt-4 flex md:ml-4 md:mt-0 space-x-3">
+                <a href="{% url 'customer_edit' customer.id %}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
+                    </svg>
+                    Редактировать
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Статистика абонента -->
+    <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt class="truncate text-sm font-medium text-gray-500">Договоров</dt>
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ contracts_count|default:0 }}</dd>
+            <dd class="mt-1 text-sm text-gray-500">
+                <span class="text-green-600">{{ active_contracts_count|default:0 }} активных</span>
+            </dd>
+        </div>
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt class="truncate text-sm font-medium text-gray-500">Открытых тикетов</dt>
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ tickets_open_count|default:0 }}</dd>
+        </div>
+        <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
+            <dt class="truncate text-sm font-medium text-gray-500">Дата регистрации</dt>
+            <dd class="mt-1 text-xl font-semibold tracking-tight text-gray-900">{{ customer.created_at|date:"d.m.Y" }}</dd>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <!-- Левая колонка - информация об абоненте -->
+        <div class="lg:col-span-1">
+            <!-- Основная информация -->
+            <div class="bg-white shadow sm:rounded-lg mb-6">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Основная информация</h3>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Телефон</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ customer.phone|default:"-" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Email</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ customer.email|default:"-" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Документ</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {{ customer.get_document_type_display }}<br>
+                                {{ customer.document_number }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Адрес</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ customer.address|default:"-" }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка - договоры, тикеты, платежи -->
+        <div class="lg:col-span-2">
+            <!-- Договоры -->
+            <div class="bg-white shadow sm:rounded-lg mb-6">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Договоры</h3>
+
+                    {% if contracts %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-300">
+                            <thead>
+                                <tr>
+                                    <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Номер</th>
+                                    <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Тариф</th>
+                                    <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">SIM</th>
+                                    <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Статус</th>
+                                    <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for contract in contracts %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="whitespace-nowrap py-3 text-sm font-medium text-primary-600">
+                                        {{ contract.number }}
+                                    </td>
+                                    <td class="whitespace-nowrap py-3 text-sm text-gray-900">
+                                        {{ contract.tariff.name|default:"-" }}
+                                    </td>
+                                    <td class="whitespace-nowrap py-3 text-sm text-gray-500">
+                                        {{ contract.sim.msisdn|default:"-" }}
+                                    </td>
+                                    <td class="whitespace-nowrap py-3 text-sm">
+                                        {% if contract.status == 'active' %}
+                                        <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold text-green-800">Активный</span>
+                                        {% elif contract.status == 'suspended' %}
+                                        <span class="inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold text-yellow-800">Приостановлен</span>
+                                        {% elif contract.status == 'closed' %}
+                                        <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold text-gray-800">Закрыт</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="whitespace-nowrap py-3 text-sm text-gray-500">
+                                        {{ contract.start_date|date:"d.m.Y" }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-500">Договоры отсутствуют</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Последние платежи -->
+            <div class="bg-white shadow sm:rounded-lg mb-6">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Последние платежи</h3>
+
+                    {% if recent_payments %}
+                    <div class="space-y-3">
+                        {% for payment in recent_payments %}
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">
+                                    Договор {{ payment.contract.number }}
+                                </p>
+                                <p class="text-xs text-gray-500">{{ payment.payment_date|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold {% if payment.transaction_type == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if payment.transaction_type == 'deposit' %}+{% else %}-{% endif %}{{ payment.amount }} ₸
+                                </p>
+                                <p class="text-xs text-gray-500">{{ payment.get_method_display }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-500">Платежи отсутствуют</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Тикеты -->
+            <div class="bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Последние тикеты</h3>
+
+                    {% if tickets %}
+                    <div class="space-y-3">
+                        {% for ticket in tickets %}
+                        <div class="border-b border-gray-200 pb-3">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center">
+                                        <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold
+                                            {% if ticket.priority == 'low' %}bg-gray-100 text-gray-800
+                                            {% elif ticket.priority == 'medium' %}bg-blue-100 text-blue-800
+                                            {% elif ticket.priority == 'high' %}bg-yellow-100 text-yellow-800
+                                            {% elif ticket.priority == 'critical' %}bg-red-100 text-red-800{% endif %}">
+                                            #{{ ticket.id }}
+                                        </span>
+                                        <span class="ml-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold
+                                            {% if ticket.status == 'new' %}bg-blue-100 text-blue-800
+                                            {% elif ticket.status == 'in_progress' %}bg-yellow-100 text-yellow-800
+                                            {% elif ticket.status == 'resolved' %}bg-green-100 text-green-800
+                                            {% elif ticket.status == 'closed' %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ ticket.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <p class="mt-1 text-sm font-medium text-gray-900">{{ ticket.subject }}</p>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        {{ ticket.created_at|date:"d.m.Y H:i" }}
+                                        {% if ticket.assigned_to %} • Исполнитель: {{ ticket.assigned_to.get_full_name }}{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-sm text-gray-500">Тикеты отсутствуют</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
