@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Редактирование тарифа{% else %}Новый тариф{% endif %}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">{% if object %}Редактирование тарифа{% else %}Новый тариф{% endif %}</h1>
+    <form method="post" class="bg-white shadow rounded-lg p-6 space-y-6">
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2"><label class="block text-sm font-medium">Название <span class="text-red-500">*</span></label><input type="text" name="name" value="{{ form.name.value|default:'' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></div>
+            <div class="col-span-2"><label class="block text-sm font-medium">Описание</label><textarea name="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">{{ form.description.value|default:'' }}</textarea></div>
+            <div><label class="block text-sm font-medium">Тип <span class="text-red-500">*</span></label><select name="type" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"><option value="prepaid" {% if form.type.value == 'prepaid' %}selected{% endif %}>Prepaid</option><option value="postpaid" {% if form.type.value == 'postpaid' %}selected{% endif %}>Postpaid</option></select></div>
+            <div><label class="block text-sm font-medium">Абонплата (₸) <span class="text-red-500">*</span></label><input type="number" step="0.01" name="monthly_fee" value="{{ form.monthly_fee.value|default:'' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div><label class="block text-sm font-medium">Минуты</label><input type="number" name="included_minutes" value="{{ form.included_minutes.value|default:'' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div><label class="block text-sm font-medium">SMS</label><input type="number" name="included_sms" value="{{ form.included_sms.value|default:'' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div><label class="block text-sm font-medium">Интернет (ГБ)</label><input type="number" step="0.1" name="included_internet_gb" value="{{ form.included_internet_gb.value|default:'' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div><label class="block text-sm font-medium">Цена мин (₸)</label><input type="number" step="0.01" name="price_per_minute" value="{{ form.price_per_minute.value|default:'' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div><label class="block text-sm font-medium">Цена SMS (₸)</label><input type="number" step="0.01" name="price_per_sms" value="{{ form.price_per_sms.value|default:'' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div><label class="block text-sm font-medium">Цена ГБ (₸)</label><input type="number" step="0.01" name="price_per_gb" value="{{ form.price_per_gb.value|default:'' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div><label class="block text-sm font-medium">Приоритет</label><input type="number" name="priority" value="{{ form.priority.value|default:10 }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
+            <div class="flex items-center"><input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %} class="rounded border-gray-300"><label class="ml-2 text-sm">Активен</label></div>
+        </div>
+        <div class="flex justify-end gap-3">
+            <a href="{% if object %}{% url 'tariff_detail' object.id %}{% else %}{% url 'tariff_list' %}{% endif %}" class="px-4 py-2 border rounded hover:bg-gray-50">Отмена</a>
+            <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded hover:bg-primary-500">{% if object %}Сохранить{% else %}Создать{% endif %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

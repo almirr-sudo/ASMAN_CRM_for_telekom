@@ -29,6 +29,11 @@ urlpatterns = [
 
     # Frontend views
     path('', include('apps.customers.urls_views')),
+    path('', include('apps.sims.urls_views')),
+    path('', include('apps.tariffs.urls_views')),
+    path('', include('apps.contracts.urls_views')),
+    path('', include('apps.payments.urls_views')),
+    path('', include('apps.tickets.urls_views')),
 ]
 
 # Serve media files in development

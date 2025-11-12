@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Тикет #{{ ticket.id }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex justify-between mb-6"><h1 class="text-2xl font-bold">Тикет #{{ ticket.id }}: {{ ticket.subject }}</h1><a href="{% url 'ticket_edit' ticket.id %}" class="bg-primary-600 text-white px-4 py-2 rounded">Редактировать</a></div>
+    <div class="bg-white shadow rounded p-6 space-y-4">
+        <div class="flex gap-4">
+            {% if ticket.priority == 'critical' %}<span class="bg-red-100 text-red-800 px-3 py-1 rounded">Критический</span>
+            {% elif ticket.priority == 'high' %}<span class="bg-orange-100 text-orange-800 px-3 py-1 rounded">Высокий</span>
+            {% elif ticket.priority == 'medium' %}<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded">Средний</span>
+            {% else %}<span class="bg-gray-100 text-gray-800 px-3 py-1 rounded">Низкий</span>{% endif %}
+
+            {% if ticket.status == 'new' %}<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded">Новый</span>
+            {% elif ticket.status == 'in_progress' %}<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded">В работе</span>
+            {% elif ticket.status == 'resolved' %}<span class="bg-green-100 text-green-800 px-3 py-1 rounded">Решен</span>
+            {% endif %}
+        </div>
+        <div class="border-t pt-4">
+            <h3 class="font-semibold mb-2">Описание</h3>
+            <p class="text-gray-700">{{ ticket.description }}</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 border-t pt-4">
+            <div><dt class="text-sm text-gray-500">Абонент</dt><dd><a href="{% url 'customer_detail' ticket.customer.id %}" class="text-primary-600">{{ ticket.customer.get_full_name }}</a></dd></div>
+            <div><dt class="text-sm text-gray-500">Категория</dt><dd>{{ ticket.get_category_display }}</dd></div>
+            <div><dt class="text-sm text-gray-500">Создан</dt><dd>{{ ticket.created_at|date:"d.m.Y H:i" }}</dd></div>
+            <div><dt class="text-sm text-gray-500">Исполнитель</dt><dd>{{ ticket.assigned_to.get_full_name|default:"Не назначен" }}</dd></div>
+        </div>
+        {% if ticket.resolution %}
+        <div class="border-t pt-4">
+            <h3 class="font-semibold mb-2">Решение</h3>
+            <p class="text-gray-700">{{ ticket.resolution }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

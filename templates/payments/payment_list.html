@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Платежи{% endblock %}
+{% block content %}
+<div class="max-w-screen-xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Платежи</h1>
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Завершенных</p><p class="text-3xl font-bold">{{ total_count }}</p></div>
+        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Общая сумма</p><p class="text-3xl font-bold text-green-600">{{ total_amount|floatformat:0 }} ₸</p></div>
+        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">В обработке</p><p class="text-3xl font-bold text-yellow-600">{{ pending_count }}</p></div>
+    </div>
+    <div class="bg-white shadow rounded overflow-hidden">
+        <table class="min-w-full divide-y">
+            <thead class="bg-gray-50"><tr><th class="py-3 px-4 text-left text-sm font-semibold">Дата</th><th class="py-3 px-4 text-left text-sm font-semibold">Договор</th><th class="py-3 px-4 text-left text-sm font-semibold">Абонент</th><th class="py-3 px-4 text-left text-sm font-semibold">Тип</th><th class="py-3 px-4 text-left text-sm font-semibold">Сумма</th><th class="py-3 px-4 text-left text-sm font-semibold">Статус</th></tr></thead>
+            <tbody class="divide-y">
+                {% for payment in payments %}
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 text-sm">{{ payment.payment_date|date:"d.m.Y H:i" }}</td>
+                    <td class="py-3 px-4 text-sm"><a href="{% url 'contract_detail' payment.contract.id %}" class="text-primary-600">{{ payment.contract.number }}</a></td>
+                    <td class="py-3 px-4 text-sm">{{ payment.contract.customer.get_full_name }}</td>
+                    <td class="py-3 px-4 text-sm">{{ payment.get_transaction_type_display }}</td>
+                    <td class="py-3 px-4 text-sm font-bold {% if payment.transaction_type == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">{% if payment.transaction_type == 'deposit' %}+{% else %}-{% endif %}{{ payment.amount }} ₸</td>
+                    <td class="py-3 px-4 text-sm">{% if payment.status == 'completed' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Завершен</span>{% elif payment.status == 'pending' %}<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">В обработке</span>{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="py-12 text-center text-gray-500">Платежи не найдены</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

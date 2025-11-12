@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Платеж #{{ payment.id }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Платеж #{{ payment.id }}</h1>
+    <div class="bg-white shadow rounded p-6">
+        <dl class="space-y-3">
+            <div><dt class="text-sm text-gray-500">Дата</dt><dd class="font-medium">{{ payment.payment_date|date:"d.m.Y H:i" }}</dd></div>
+            <div><dt class="text-sm text-gray-500">Договор</dt><dd><a href="{% url 'contract_detail' payment.contract.id %}" class="text-primary-600">{{ payment.contract.number }}</a></dd></div>
+            <div><dt class="text-sm text-gray-500">Тип</dt><dd>{{ payment.get_transaction_type_display }}</dd></div>
+            <div><dt class="text-sm text-gray-500">Сумма</dt><dd class="text-2xl font-bold {% if payment.transaction_type == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">{{ payment.amount }} ₸</dd></div>
+            <div><dt class="text-sm text-gray-500">Способ оплаты</dt><dd>{{ payment.get_method_display }}</dd></div>
+            <div><dt class="text-sm text-gray-500">Статус</dt><dd>{% if payment.status == 'completed' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded">Завершен</span>{% endif %}</dd></div>
+        </dl>
+    </div>
+</div>
+{% endblock %}

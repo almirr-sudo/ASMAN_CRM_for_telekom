@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Договор {{ contract.number }}{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Договор {{ contract.number }}</h1>
+    <div class="grid grid-cols-3 gap-6">
+        <div class="bg-white shadow rounded p-6"><h3 class="font-semibold mb-4">Информация</h3>
+            <dl class="space-y-2 text-sm">
+                <div><dt class="text-gray-500">Абонент</dt><dd><a href="{% url 'customer_detail' contract.customer.id %}" class="text-primary-600">{{ contract.customer.get_full_name }}</a></dd></div>
+                <div><dt class="text-gray-500">Тариф</dt><dd>{{ contract.tariff.name }}</dd></div>
+                <div><dt class="text-gray-500">SIM</dt><dd>{{ contract.sim.msisdn|default:"-" }}</dd></div>
+                <div><dt class="text-gray-500">Баланс</dt><dd class="{% if contract.balance < 0 %}text-red-600{% else %}text-green-600{% endif %} font-bold">{{ contract.balance }} ₸</dd></div>
+                <div><dt class="text-gray-500">Статус</dt><dd>{% if contract.status == 'active' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded">Активный</span>{% endif %}</dd></div>
+            </dl>
+        </div>
+        <div class="col-span-2 bg-white shadow rounded p-6"><h3 class="font-semibold mb-4">Платежи</h3>
+            <div class="space-y-2">
+                {% for payment in payments %}
+                <div class="flex justify-between border-b pb-2"><div><p class="font-medium">{{ payment.get_transaction_type_display }}</p><p class="text-xs text-gray-500">{{ payment.payment_date|date:"d.m.Y H:i" }}</p></div><span class="font-bold {% if payment.transaction_type == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">{% if payment.transaction_type == 'deposit' %}+{% else %}-{% endif %}{{ payment.amount }} ₸</span></div>
+                {% empty %}
+                <p class="text-gray-500">Нет платежей</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

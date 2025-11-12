@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}{{ tariff.name }}{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex justify-between mb-6"><h1 class="text-3xl font-bold">{{ tariff.name }}</h1><a href="{% url 'tariff_edit' tariff.id %}" class="bg-primary-600 text-white px-4 py-2 rounded">Редактировать</a></div>
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Абонплата</p><p class="text-2xl font-bold">{{ tariff.monthly_fee }} ₸/мес</p></div>
+        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Всего договоров</p><p class="text-2xl font-bold">{{ contracts_count }}</p></div>
+        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Активных договоров</p><p class="text-2xl font-bold text-green-600">{{ active_contracts_count }}</p></div>
+    </div>
+    <div class="grid grid-cols-2 gap-6">
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Информация о тарифе</h3>
+            <dl class="space-y-2">
+                <div><dt class="text-sm text-gray-500">Тип</dt><dd>{% if tariff.type == 'prepaid' %}Предоплата{% else %}Постоплата{% endif %}</dd></div>
+                <div><dt class="text-sm text-gray-500">Статус</dt><dd>{% if tariff.is_active %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded">Активен</span>{% else %}<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">Архив</span>{% endif %}</dd></div>
+                <div><dt class="text-sm text-gray-500">Приоритет</dt><dd>{{ tariff.priority }}</dd></div>
+                <div><dt class="text-sm text-gray-500">Описание</dt><dd class="text-sm">{{ tariff.description }}</dd></div>
+            </dl>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Условия тарифа</h3>
+            <dl class="space-y-2">
+                <div><dt class="text-sm text-gray-500">Включенные минуты</dt><dd>{{ tariff.included_minutes|default:"Безлимит" }}</dd></div>
+                <div><dt class="text-sm text-gray-500">Включенные SMS</dt><dd>{{ tariff.included_sms|default:"Безлимит" }}</dd></div>
+                <div><dt class="text-sm text-gray-500">Включенный интернет</dt><dd>{{ tariff.included_internet_gb|default:"Безлимит" }} ГБ</dd></div>
+                <div class="pt-2 border-t"><dt class="text-sm text-gray-500">Сверх лимита - минута</dt><dd>{{ tariff.price_per_minute|default:"0" }} ₸</dd></div>
+                <div><dt class="text-sm text-gray-500">Сверх лимита - SMS</dt><dd>{{ tariff.price_per_sms|default:"0" }} ₸</dd></div>
+                <div><dt class="text-sm text-gray-500">Сверх лимита - ГБ</dt><dd>{{ tariff.price_per_gb|default:"0" }} ₸</dd></div>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}
