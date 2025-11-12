@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Telecom CRM{% endblock %}
+
+{% block page_title %}Добро пожаловать в Telecom CRM{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Абоненты -->
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-lg font-medium text-gray-900">Абоненты</h3>
+                    <p class="mt-1 text-3xl font-semibold text-gray-900">-</p>
+                    <p class="mt-1 text-sm text-gray-500">Всего зарегистрировано</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/customers/" class="text-sm font-medium text-primary-600 hover:text-primary-500">
+                    Посмотреть все →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIM-карты -->
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-lg font-medium text-gray-900">SIM-карты</h3>
+                    <p class="mt-1 text-3xl font-semibold text-gray-900">-</p>
+                    <p class="mt-1 text-sm text-gray-500">Активных SIM</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/sims/" class="text-sm font-medium text-green-600 hover:text-green-500">
+                    Посмотреть все →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Договоры -->
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-lg font-medium text-gray-900">Договоры</h3>
+                    <p class="mt-1 text-3xl font-semibold text-gray-900">-</p>
+                    <p class="mt-1 text-sm text-gray-500">Активных договоров</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/contracts/" class="text-sm font-medium text-yellow-600 hover:text-yellow-500">
+                    Посмотреть все →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Тикеты -->
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-6">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </div>
+                <div class="ml-4 flex-1">
+                    <h3 class="text-lg font-medium text-gray-900">Тикеты</h3>
+                    <p class="mt-1 text-3xl font-semibold text-gray-900">-</p>
+                    <p class="mt-1 text-sm text-gray-500">Открытых тикетов</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/tickets/" class="text-sm font-medium text-red-600 hover:text-red-500">
+                    Посмотреть все →
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Быстрые действия -->
+<div class="mt-8">
+    <h2 class="text-lg font-medium text-gray-900">Быстрые действия</h2>
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <a href="/customers/create/" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <span class="mt-2 block text-sm font-medium text-gray-900">Добавить абонента</span>
+        </a>
+
+        <a href="/contracts/create/" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span class="mt-2 block text-sm font-medium text-gray-900">Создать договор</span>
+        </a>
+
+        <a href="/payments/create/" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <span class="mt-2 block text-sm font-medium text-gray-900">Принять платеж</span>
+        </a>
+    </div>
+</div>
+
+<!-- Информационные блоки -->
+<div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <!-- Последние тикеты -->
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900">Последние тикеты</h3>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Пока нет тикетов</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние платежи -->
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900">Последние платежи</h3>
+            <div class="mt-4">
+                <p class="text-sm text-gray-500">Пока нет платежей</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
