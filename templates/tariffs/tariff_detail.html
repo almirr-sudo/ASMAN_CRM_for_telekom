@@ -12,7 +12,7 @@
         <div class="bg-white shadow rounded-lg p-6">
             <h3 class="text-lg font-semibold mb-4">Информация о тарифе</h3>
             <dl class="space-y-2">
-                <div><dt class="text-sm text-gray-500">Тип</dt><dd>{% if tariff.type == 'prepaid' %}Предоплата{% else %}Постоплата{% endif %}</dd></div>
+                <div><dt class="text-sm text-gray-500">Тип</dt><dd>{% if tariff.tariff_type == 'prepaid' %}Предоплата{% else %}Постоплата{% endif %}</dd></div>
                 <div><dt class="text-sm text-gray-500">Статус</dt><dd>{% if tariff.is_active %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded">Активен</span>{% else %}<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">Архив</span>{% endif %}</dd></div>
                 <div><dt class="text-sm text-gray-500">Приоритет</dt><dd>{{ tariff.priority }}</dd></div>
                 <div><dt class="text-sm text-gray-500">Описание</dt><dd class="text-sm">{{ tariff.description }}</dd></div>
@@ -21,12 +21,12 @@
         <div class="bg-white shadow rounded-lg p-6">
             <h3 class="text-lg font-semibold mb-4">Условия тарифа</h3>
             <dl class="space-y-2">
-                <div><dt class="text-sm text-gray-500">Включенные минуты</dt><dd>{{ tariff.included_minutes|default:"Безлимит" }}</dd></div>
-                <div><dt class="text-sm text-gray-500">Включенные SMS</dt><dd>{{ tariff.included_sms|default:"Безлимит" }}</dd></div>
-                <div><dt class="text-sm text-gray-500">Включенный интернет</dt><dd>{{ tariff.included_internet_gb|default:"Безлимит" }} ГБ</dd></div>
-                <div class="pt-2 border-t"><dt class="text-sm text-gray-500">Сверх лимита - минута</dt><dd>{{ tariff.price_per_minute|default:"0" }} ₸</dd></div>
-                <div><dt class="text-sm text-gray-500">Сверх лимита - SMS</dt><dd>{{ tariff.price_per_sms|default:"0" }} ₸</dd></div>
-                <div><dt class="text-sm text-gray-500">Сверх лимита - ГБ</dt><dd>{{ tariff.price_per_gb|default:"0" }} ₸</dd></div>
+                <div><dt class="text-sm text-gray-500">Включенные минуты</dt><dd>{{ tariff.minutes_included|default:"Безлимит" }}</dd></div>
+                <div><dt class="text-sm text-gray-500">Включенные SMS</dt><dd>{{ tariff.sms_included|default:"Безлимит" }}</dd></div>
+                <div><dt class="text-sm text-gray-500">Включенный интернет</dt><dd>{{ tariff.data_gb_included|default:"Безлимит" }} ГБ</dd></div>
+                <div class="pt-2 border-t"><dt class="text-sm text-gray-500">Сверх лимита - минута</dt><dd>{{ tariff.minute_overage_cost|default:"0" }} ₸</dd></div>
+                <div><dt class="text-sm text-gray-500">Сверх лимита - SMS</dt><dd>{{ tariff.sms_overage_cost|default:"0" }} ₸</dd></div>
+                <div><dt class="text-sm text-gray-500">Сверх лимита - ГБ</dt><dd>{{ tariff.data_gb_overage_cost|default:"0" }} ₸</dd></div>
             </dl>
         </div>
     </div>

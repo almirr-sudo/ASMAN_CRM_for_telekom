@@ -11,7 +11,7 @@ class ContractListView(ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        queryset = Contract.objects.select_related('customer', 'tariff', 'sim').order_by('-created_at')
+        queryset = Contract.objects.select_related('customer', 'tariff', 'sim_card').order_by('-created_at')
         status = self.request.GET.get('status')
         if status:
             queryset = queryset.filter(status=status)

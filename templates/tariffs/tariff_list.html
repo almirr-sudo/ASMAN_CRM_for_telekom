@@ -28,9 +28,9 @@
             <p class="text-gray-600 text-sm mb-4">{{ tariff.description|truncatewords:20 }}</p>
             <div class="border-t pt-4 space-y-2">
                 <div class="flex justify-between"><span class="text-sm text-gray-600">Абонплата:</span><span class="font-bold">{{ tariff.monthly_fee }} ₸</span></div>
-                <div class="flex justify-between"><span class="text-sm text-gray-600">Минуты:</span><span>{{ tariff.included_minutes|default:"∞" }}</span></div>
-                <div class="flex justify-between"><span class="text-sm text-gray-600">SMS:</span><span>{{ tariff.included_sms|default:"∞" }}</span></div>
-                <div class="flex justify-between"><span class="text-sm text-gray-600">Интернет:</span><span>{{ tariff.included_internet_gb|default:"∞" }} ГБ</span></div>
+                <div class="flex justify-between"><span class="text-sm text-gray-600">Минуты:</span><span>{{ tariff.minutes_included|default:"∞" }}</span></div>
+                <div class="flex justify-between"><span class="text-sm text-gray-600">SMS:</span><span>{{ tariff.sms_included|default:"∞" }}</span></div>
+                <div class="flex justify-between"><span class="text-sm text-gray-600">Интернет:</span><span>{{ tariff.data_gb_included|default:"∞" }} ГБ</span></div>
             </div>
             <div class="mt-4 flex gap-2">
                 <a href="{% url 'tariff_detail' tariff.id %}" class="flex-1 text-center bg-gray-100 px-3 py-2 rounded hover:bg-gray-200">Подробнее</a>

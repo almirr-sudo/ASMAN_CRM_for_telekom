@@ -8,7 +8,7 @@
             <dl class="space-y-2 text-sm">
                 <div><dt class="text-gray-500">Абонент</dt><dd><a href="{% url 'customer_detail' contract.customer.id %}" class="text-primary-600">{{ contract.customer.get_full_name }}</a></dd></div>
                 <div><dt class="text-gray-500">Тариф</dt><dd>{{ contract.tariff.name }}</dd></div>
-                <div><dt class="text-gray-500">SIM</dt><dd>{{ contract.sim.msisdn|default:"-" }}</dd></div>
+                <div><dt class="text-gray-500">SIM</dt><dd>{{ contract.sim_card.msisdn|default:"-" }}</dd></div>
                 <div><dt class="text-gray-500">Баланс</dt><dd class="{% if contract.balance < 0 %}text-red-600{% else %}text-green-600{% endif %} font-bold">{{ contract.balance }} ₸</dd></div>
                 <div><dt class="text-gray-500">Статус</dt><dd>{% if contract.status == 'active' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded">Активный</span>{% endif %}</dd></div>
             </dl>

@@ -25,7 +25,7 @@ class TariffListView(ListView):
 
         tariff_type = self.request.GET.get('type')
         if tariff_type:
-            queryset = queryset.filter(type=tariff_type)
+            queryset = queryset.filter(tariff_type=tariff_type)
 
         search = self.request.GET.get('search')
         if search:
@@ -37,8 +37,8 @@ class TariffListView(ListView):
         context = super().get_context_data(**kwargs)
         context['total_count'] = Tariff.objects.count()
         context['active_count'] = Tariff.objects.filter(is_active=True).count()
-        context['prepaid_count'] = Tariff.objects.filter(type='prepaid', is_active=True).count()
-        context['postpaid_count'] = Tariff.objects.filter(type='postpaid', is_active=True).count()
+        context['prepaid_count'] = Tariff.objects.filter(tariff_type='prepaid', is_active=True).count()
+        context['postpaid_count'] = Tariff.objects.filter(tariff_type='postpaid', is_active=True).count()
         context['current_is_active'] = self.request.GET.get('is_active', '')
         context['current_type'] = self.request.GET.get('type', '')
         context['current_search'] = self.request.GET.get('search', '')
@@ -60,8 +60,8 @@ class TariffDetailView(DetailView):
 class TariffCreateView(CreateView):
     model = Tariff
     template_name = 'tariffs/tariff_form.html'
-    fields = ['name', 'description', 'type', 'monthly_fee', 'included_minutes', 'included_sms',
-              'included_internet_gb', 'price_per_minute', 'price_per_sms', 'price_per_gb',
+    fields = ['name', 'description', 'tariff_type', 'monthly_fee', 'minutes_included', 'sms_included',
+              'data_gb_included', 'minute_overage_cost', 'sms_overage_cost', 'data_gb_overage_cost',
               'priority', 'is_active']
     success_url = reverse_lazy('tariff_list')
 
@@ -73,8 +73,8 @@ class TariffCreateView(CreateView):
 class TariffUpdateView(UpdateView):
     model = Tariff
     template_name = 'tariffs/tariff_form.html'
-    fields = ['name', 'description', 'type', 'monthly_fee', 'included_minutes', 'included_sms',
-              'included_internet_gb', 'price_per_minute', 'price_per_sms', 'price_per_gb',
+    fields = ['name', 'description', 'tariff_type', 'monthly_fee', 'minutes_included', 'sms_included',
+              'data_gb_included', 'minute_overage_cost', 'sms_overage_cost', 'data_gb_overage_cost',
               'priority', 'is_active']
 
     def get_success_url(self):
