@@ -3,7 +3,17 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(dir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(venv/Scripts/python.exe manage.py runserver:*)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(venvScriptspython.exe manage.py makemigrations)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(ping:*)",
+      "Bash(nul)",
+      "Bash(curl:*)",
+      "Bash(if exist nul del /f nul)"
     ],
     "deny": [],
     "ask": []
