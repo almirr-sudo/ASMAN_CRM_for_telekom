@@ -127,3 +127,125 @@ class PaymentViewSet(viewsets.ModelViewSet):
             ).aggregate(Sum('amount'))['amount__sum'] or 0,
         }
         return Response(stats)
+
+    @action(detail=False, methods=['post'])
+    def create_payment_link(self, request):
+        """
+        Создание ссылки на оплату через платежный шлюз.
+
+        Body:
+            contract_id: ID договора
+            amount: сумма пополнения
+            description: описание (опционально)
+            gateway: платежный шлюз ('kaspi', 'halyk', 'default')
+            return_url: URL для возврата (опционально)
+        """
+        from apps.contracts.models import Contract
+
+        contract_id = request.data.get('contract_id')
+        amount = request.data.get('amount')
+        description = request.data.get('description', '')
+        gateway = request.data.get('gateway', 'default')
+        return_url = request.data.get('return_url')
+
+        # Валидация
+        if not contract_id:
+            return Response({'error': 'contract_id обязателен'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not amount or float(amount) <= 0:
+            return Response({'error': 'amount должен быть положительным числом'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            contract = Contract.objects.get(id=contract_id)
+        except Contract.DoesNotExist:
+            return Response({'error': 'Договор не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Создаем платежную ссылку
+        try:
+            result = Payment.create_payment_link(
+                contract=contract,
+                amount=amount,
+                description=description,
+                gateway=gateway,
+                return_url=return_url
+            )
+
+            return Response({
+                'payment_id': result['payment']['id'],
+                'transaction_id': result['payment_id'],
+                'payment_url': result['payment_url'],
+                'gateway': result['gateway'],
+                'amount': float(amount),
+                'status': 'pending'
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def check_status(self, request, pk=None):
+        """
+        Проверка статуса платежа в платежном шлюзе.
+        """
+        payment = self.get_object()
+
+        try:
+            gateway_status = payment.check_gateway_status()
+
+            # Обрабатываем callback если статус изменился
+            if gateway_status['status'] in ['completed', 'failed']:
+                payment.process_gateway_callback(gateway_status)
+
+            return Response({
+                'payment_id': payment.id,
+                'transaction_id': payment.transaction_id,
+                'status': payment.status,
+                'gateway_status': gateway_status
+            })
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'])
+    def webhook(self, request):
+        """
+        Webhook для обработки callback'ов от платежных шлюзов.
+
+        Body:
+            payment_id: ID платежа в нашей системе или transaction_id
+            status: статус платежа ('completed', 'failed')
+            signature: подпись для верификации
+            ... другие данные от шлюза
+        """
+        from apps.payments.payment_gateway import get_payment_gateway
+
+        payment_id = request.data.get('payment_id')
+        transaction_id = request.data.get('transaction_id', payment_id)
+        signature = request.data.get('signature', '')
+
+        # Проверяем подпись
+        gateway = get_payment_gateway()
+        if not gateway.verify_webhook_signature(request.data, signature):
+            return Response({'error': 'Неверная подпись'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Находим платеж
+        try:
+            if transaction_id:
+                payment = Payment.objects.get(transaction_id=transaction_id)
+            else:
+                payment = Payment.objects.get(id=payment_id)
+        except Payment.DoesNotExist:
+            return Response({'error': 'Платеж не найден'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Обрабатываем callback
+        try:
+            payment.process_gateway_callback(request.data)
+
+            return Response({
+                'status': 'ok',
+                'payment_id': payment.id,
+                'new_status': payment.status
+            })
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

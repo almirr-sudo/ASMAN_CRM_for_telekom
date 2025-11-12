@@ -186,10 +186,11 @@ class Payment(models.Model):
     def process(self):
         """Обработка платежа (зачисление/списание средств)"""
         from django.utils import timezone
-        from django.db import transaction
+        from django.db import transaction as db_transaction
+        from apps.payments.notifications import notify_payment_completed
 
         if self.status == 'success' and not self.processed_at:
-            with transaction.atomic():
+            with db_transaction.atomic():
                 # Блокируем договор для обновления
                 contract = self.contract
 
@@ -209,6 +210,10 @@ class Payment(models.Model):
                 self.balance_after = contract.balance
                 self.processed_at = timezone.now()
                 self.save(update_fields=['balance_after', 'processed_at'])
+
+                # Отправляем уведомление об успешном платеже
+                if self.transaction_type in ['payment', 'refund']:
+                    notify_payment_completed(self)
 
     def approve(self, user=None):
         """Подтверждение и обработка платежа"""
@@ -325,3 +330,95 @@ class Payment(models.Model):
         )
 
         return payment
+
+    @staticmethod
+    def create_payment_link(contract, amount, description='', gateway='default', return_url=None):
+        """
+        Создание ссылки на оплату через платежный шлюз.
+
+        Args:
+            contract: договор
+            amount: сумма пополнения
+            description: описание платежа
+            gateway: название платежного шлюза ('kaspi', 'halyk', 'default')
+            return_url: URL для возврата после оплаты
+
+        Returns:
+            dict: {
+                'payment': Payment object,
+                'payment_url': str,
+                'payment_id': str
+            }
+        """
+        from apps.payments.payment_gateway import get_payment_gateway
+
+        # Создаем pending платеж
+        payment = Payment.objects.create(
+            contract=contract,
+            transaction_type='payment',
+            amount=abs(amount),
+            status='pending',
+            payment_method='card' if gateway in ['kaspi', 'halyk'] else 'mobile_payment',
+            description=description or 'Пополнение баланса через платежный шлюз'
+        )
+
+        # Получаем платежный шлюз
+        gateway_instance = get_payment_gateway(gateway)
+
+        # Создаем платежную ссылку
+        gateway_response = gateway_instance.create_payment_link(
+            amount=amount,
+            description=description or f'Пополнение договора {contract.number}',
+            return_url=return_url
+        )
+
+        # Сохраняем transaction_id из шлюза
+        payment.transaction_id = gateway_response['payment_id']
+        payment.save()
+
+        return {
+            'payment': payment,
+            'payment_url': gateway_response['payment_url'],
+            'payment_id': gateway_response['payment_id'],
+            'gateway': gateway_response.get('gateway', 'default')
+        }
+
+    def check_gateway_status(self):
+        """
+        Проверка статуса платежа в платежном шлюзе.
+
+        Returns:
+            dict: статус платежа из шлюза
+        """
+        from apps.payments.payment_gateway import get_payment_gateway
+
+        if not self.transaction_id:
+            raise ValidationError('У платежа нет transaction_id для проверки статуса')
+
+        gateway = get_payment_gateway()
+        return gateway.check_payment_status(self.transaction_id)
+
+    def process_gateway_callback(self, gateway_status_data):
+        """
+        Обработка callback от платежного шлюза.
+
+        Args:
+            gateway_status_data: данные о статусе платежа из шлюза
+        """
+        from django.utils import timezone
+        from apps.payments.notifications import notify_payment_error
+
+        if gateway_status_data['status'] == 'completed':
+            self.status = 'success'
+            self.processed_at = timezone.now()
+            self.save()
+            # Платеж будет автоматически обработан в save()
+        elif gateway_status_data['status'] == 'failed':
+            self.status = 'failed'
+            self.processed_at = timezone.now()
+            error_msg = gateway_status_data.get('error', 'Неизвестная ошибка')
+            self.description = f"{self.description}\nОшибка: {error_msg}"
+            self.save()
+
+            # Отправляем уведомление об ошибке
+            notify_payment_error(self, error_msg)

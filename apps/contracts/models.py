@@ -198,6 +198,8 @@ class Contract(models.Model):
 
     def suspend(self, reason=''):
         """Приостановка договора (например, при отрицательном балансе)"""
+        from apps.payments.notifications import notify_contract_status_change
+
         if self.status != 'active':
             raise ValidationError(f'Невозможно приостановить договор со статусом "{self.get_status_display()}"')
 
@@ -211,8 +213,13 @@ class Contract(models.Model):
             self.sim_card.status = 'suspended'
             self.sim_card.save()
 
+        # Отправляем уведомление
+        notify_contract_status_change(self, 'suspended', reason)
+
     def resume(self):
         """Возобновление приостановленного договора"""
+        from apps.payments.notifications import notify_contract_status_change
+
         if self.status != 'suspended':
             raise ValidationError(f'Невозможно возобновить договор со статусом "{self.get_status_display()}"')
 
@@ -223,6 +230,9 @@ class Contract(models.Model):
         if hasattr(self, 'sim_card'):
             self.sim_card.status = 'active'
             self.sim_card.save()
+
+        # Отправляем уведомление
+        notify_contract_status_change(self, 'active')
 
     def terminate(self):
         """Расторжение договора"""
@@ -250,11 +260,12 @@ class Contract(models.Model):
         if amount <= 0:
             raise ValidationError('Сумма пополнения должна быть положительной')
 
+        was_suspended = self.status == 'suspended'
         self.balance += Decimal(str(amount))
         self.save()
 
         # Если баланс стал положительным и договор был приостановлен, возобновляем его
-        if self.balance > 0 and self.status == 'suspended':
+        if self.balance > 0 and was_suspended:
             self.resume()
 
     def deduct_balance(self, amount, description='Списание'):
@@ -265,12 +276,19 @@ class Contract(models.Model):
             amount: сумма списания
             description: описание операции
         """
+        from apps.payments.notifications import notify_balance_warning
+
         if amount <= 0:
             raise ValidationError('Сумма списания должна быть положительной')
 
+        old_balance = self.balance
         self.balance -= Decimal(str(amount))
         self.total_cost += Decimal(str(amount))
         self.save()
+
+        # Предупреждаем о низком балансе (если баланс стал меньше 100 и был выше)
+        if self.balance < 100 and old_balance >= 100:
+            notify_balance_warning(self)
 
         # Если баланс стал отрицательным, приостанавливаем договор
         if self.balance < 0 and self.status == 'active':
@@ -280,19 +298,24 @@ class Contract(models.Model):
         """Списание ежемесячной абонентской платы"""
         from django.utils import timezone
         from dateutil.relativedelta import relativedelta
+        from apps.payments.notifications import ContractNotifications
 
         if self.status != 'active':
             raise ValidationError(f'Невозможно списать абонплату для договора со статусом "{self.get_status_display()}"')
 
         # Списываем абонентскую плату
+        fee_amount = self.tariff.monthly_fee
         self.deduct_balance(
-            self.tariff.monthly_fee,
+            fee_amount,
             description=f'Абонентская плата за тариф "{self.tariff.name}"'
         )
 
         # Обновляем дату следующего списания
         self.next_billing_date = timezone.now().date() + relativedelta(months=1)
         self.save()
+
+        # Отправляем уведомление о списании
+        ContractNotifications.notify_monthly_charge(self, fee_amount)
 
     def get_balance_status(self):
         """Возвращает статус баланса (положительный/отрицательный)"""
