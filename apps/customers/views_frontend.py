@@ -6,17 +6,30 @@ Frontend views для отображения данных в HTML.
 """
 
 from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView
-from django.db.models import Count, Sum, Q
-from django.urls import reverse_lazy
+from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, FormView, View
+from django.db.models import Sum, Q
+from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+from django.http import HttpResponse, JsonResponse
 from datetime import datetime, timedelta
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 
 from apps.customers.models import Customer
-from apps.sims.models import SIM
-from apps.contracts.models import Contract
+from apps.contracts.models import Contract, TrafficMetric
 from apps.payments.models import Payment
 from apps.tickets.models import Ticket
+from apps.customers.forms import (
+    CustomerForm,
+    CustomerSimAssignForm,
+    OrganizationBulkSimUploadForm,
+)
+from apps.sims.models import SIM
+from apps.tariffs.models import Tariff
+from apps.users.permissions import RoleRequiredMixin
+
+
+SUCCESS_STATUSES = ['success', 'completed']
 
 
 class DashboardView(TemplateView):
@@ -58,15 +71,15 @@ class DashboardView(TemplateView):
         ).count()
 
         # Статистика по платежам
-        context['payments_total'] = Payment.objects.filter(status='completed').count()
+        context['payments_total'] = Payment.objects.filter(status__in=SUCCESS_STATUSES).count()
         context['payments_pending'] = Payment.objects.filter(status='pending').count()
         context['revenue_total'] = Payment.objects.filter(
-            status='completed',
-            transaction_type='deposit'
+            status__in=SUCCESS_STATUSES,
+            transaction_type='payment'
         ).aggregate(total=Sum('amount'))['total'] or 0
         context['revenue_month'] = Payment.objects.filter(
-            status='completed',
-            transaction_type='deposit',
+            status__in=SUCCESS_STATUSES,
+            transaction_type='payment',
             payment_date__gte=datetime.now() - timedelta(days=30)
         ).aggregate(total=Sum('amount'))['total'] or 0
 
@@ -78,7 +91,7 @@ class DashboardView(TemplateView):
         # Последние платежи (5 штук)
         context['recent_payments'] = Payment.objects.select_related(
             'contract', 'contract__customer'
-        ).filter(status='completed').order_by('-payment_date')[:5]
+        ).filter(status__in=SUCCESS_STATUSES).order_by('-payment_date')[:5]
 
         # Данные для графика активности за последние 7 дней
         today = datetime.now().date()
@@ -96,7 +109,7 @@ class DashboardView(TemplateView):
             payments_count = Payment.objects.filter(
                 payment_date__gte=date_start,
                 payment_date__lte=date_end,
-                status='completed'
+                status__in=SUCCESS_STATUSES
             ).count()
 
             activity_data.append({
@@ -106,6 +119,7 @@ class DashboardView(TemplateView):
             })
 
         context['activity_data'] = activity_data
+        context['traffic_snapshot'] = TrafficMetric.objects.first()
 
         return context
 
@@ -136,9 +150,22 @@ def recent_payments(request):
     """
     payments = Payment.objects.select_related(
         'contract', 'contract__customer'
-    ).filter(status='completed').order_by('-payment_date')[:5]
+    ).filter(status__in=SUCCESS_STATUSES).order_by('-payment_date')[:5]
 
     return render(request, 'partials/recent_payments.html', {'payments': payments})
+
+
+@login_required
+def traffic_metrics_data(request):
+    metrics = list(TrafficMetric.objects.order_by('-timestamp')[:20])
+    metrics.reverse()
+    data = {
+        'labels': [m.timestamp.strftime('%H:%M:%S') for m in metrics],
+        'calls': [m.calls for m in metrics],
+        'sms': [m.sms for m in metrics],
+        'data': [float(m.data_mb) for m in metrics],
+    }
+    return JsonResponse(data)
 
 
 class CustomerListView(ListView):
@@ -167,8 +194,9 @@ class CustomerListView(ListView):
         search = self.request.GET.get('search')
         if search:
             queryset = queryset.filter(
-                Q(firstname__icontains=search) |
-                Q(lastname__icontains=search) |
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search) |
+                Q(organization_name__icontains=search) |
                 Q(phone__icontains=search) |
                 Q(email__icontains=search)
             )
@@ -204,63 +232,212 @@ class CustomerDetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         # Получаем договоры абонента
-        context['contracts'] = Contract.objects.filter(
+        contracts_qs = Contract.objects.filter(
             customer=self.object
-        ).select_related('tariff', 'sim').order_by('-created_at')
+        ).select_related('tariff', 'sim_card').order_by('-created_at')
+        context['contracts'] = contracts_qs
 
         # Получаем тикеты абонента
-        context['tickets'] = Ticket.objects.filter(
+        tickets_qs = Ticket.objects.filter(
             customer=self.object
-        ).select_related('assigned_to').order_by('-created_at')[:10]
+        ).select_related('assigned_to').order_by('-created_at')
+        context['tickets'] = tickets_qs[:10]
 
         # Получаем последние платежи
-        contract_ids = context['contracts'].values_list('id', flat=True)
+        contract_ids = contracts_qs.values_list('id', flat=True)
         context['recent_payments'] = Payment.objects.filter(
             contract_id__in=contract_ids,
-            status='completed'
+            status__in=['success', 'completed']
         ).select_related('contract').order_by('-payment_date')[:10]
 
         # Статистика
-        context['contracts_count'] = context['contracts'].count()
-        context['active_contracts_count'] = context['contracts'].filter(status='active').count()
-        context['tickets_open_count'] = context['tickets'].filter(
+        context['contracts_count'] = contracts_qs.count()
+        context['active_contracts_count'] = contracts_qs.filter(status='active').count()
+        context['tickets_open_count'] = tickets_qs.filter(
             Q(status='new') | Q(status='in_progress')
         ).count()
+        context['can_assign_sims'] = True
+        context['can_bulk_upload'] = self.object.is_organization()
 
         return context
 
 
-class CustomerCreateView(CreateView):
+class CustomerCreateView(RoleRequiredMixin, CreateView):
     """
     Форма создания нового абонента.
     """
+    allowed_roles = ['admin', 'operator', 'supervisor']
     model = Customer
     template_name = 'customers/customer_form.html'
-    fields = [
-        'firstname', 'lastname', 'phone', 'email',
-        'document_type', 'document_number', 'address', 'status'
-    ]
+    form_class = CustomerForm
     success_url = reverse_lazy('customer_list')
 
     def form_valid(self, form):
-        messages.success(self.request, f'Абонент {form.instance.firstname} {form.instance.lastname} успешно создан!')
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            f'Абонент {self.object.get_full_name()} успешно создан!'
+        )
+        self.created_contract_id = None
+        if form.created_contracts:
+            self.created_contract_id = form.created_contracts[0].id
+        return response
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['enable_sim_assignment'] = False
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_mode'] = 'create'
+        context['return_url'] = self.request.GET.get('next') or reverse_lazy('customer_list')
+        form = context.get('form')
+        default_type = 'individual'
+        if form:
+            default_type = form.data.get('customer_type') or form.initial.get('customer_type') or default_type
+        context['customer_type_default'] = default_type
+        return context
+
+    def get_success_url(self):
+        if getattr(self, 'created_contract_id', None):
+            return reverse('contract_detail', kwargs={'pk': self.created_contract_id})
+        return self.request.POST.get('return_url') or reverse_lazy('customer_list')
 
 
-class CustomerUpdateView(UpdateView):
+class CustomerUpdateView(RoleRequiredMixin, UpdateView):
     """
     Форма редактирования абонента.
     """
+    allowed_roles = ['admin', 'operator', 'supervisor']
     model = Customer
     template_name = 'customers/customer_form.html'
-    fields = [
-        'firstname', 'lastname', 'phone', 'email',
-        'document_type', 'document_number', 'address', 'status'
-    ]
+    form_class = CustomerForm
 
     def get_success_url(self):
         return reverse_lazy('customer_detail', kwargs={'pk': self.object.pk})
 
     def form_valid(self, form):
-        messages.success(self.request, f'Данные абонента {form.instance.firstname} {form.instance.lastname} обновлены!')
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, f'Данные абонента {self.object.get_full_name()} обновлены!')
+        return response
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['enable_sim_assignment'] = False
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_mode'] = 'update'
+        context['return_url'] = self.request.GET.get('next') or self.request.POST.get('return_url') or reverse_lazy('customer_detail', kwargs={'pk': self.object.pk})
+        form = context.get('form')
+        default_type = self.object.customer_type
+        if form:
+            default_type = form.data.get('customer_type') or form.initial.get('customer_type') or default_type
+        context['customer_type_default'] = default_type
+        return context
+
+
+class CustomerSimAssignView(RoleRequiredMixin, FormView):
+    template_name = 'customers/customer_sim_assign.html'
+    form_class = CustomerSimAssignForm
+    allowed_roles = ['admin', 'operator', 'supervisor']
+
+    def dispatch(self, request, *args, **kwargs):
+        self.customer = get_object_or_404(Customer, pk=kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['customer'] = self.customer
+        return context
+
+    def form_valid(self, form):
+        sims = form.cleaned_data['sims']
+        tariff = form.cleaned_data['tariff']
+        created = 0
+        for sim in sims:
+            contract = Contract.objects.create(
+                customer=self.customer,
+                tariff=tariff,
+                signed_date=timezone.now().date(),
+                status='draft',
+                notes='Подключено вручную через форму назначения SIM.'
+            )
+            contract.activate(sim)
+            created += 1
+        messages.success(self.request, f'Назначено {created} SIM-карт клиенту {self.customer.get_full_name()}')
+        return redirect('customer_detail', pk=self.customer.pk)
+
+
+class OrganizationBulkSimUploadView(RoleRequiredMixin, FormView):
+    template_name = 'customers/customer_bulk_import.html'
+    form_class = OrganizationBulkSimUploadForm
+    allowed_roles = ['admin', 'supervisor']
+
+    def get_initial(self):
+        initial = super().get_initial()
+        org_id = self.request.GET.get('organization')
+        if org_id:
+            initial['organization'] = org_id
+        return initial
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        return kwargs
+
+    def form_valid(self, form):
+        organization = form.cleaned_data['organization']
+        rows = form.parse_rows()
+        errors = []
+        created = 0
+        for idx, row in enumerate(rows, start=2):
+            iccid = str(row.get('iccid', '')).strip()
+            imsi = str(row.get('imsi', '')).strip()
+            msisdn = str(row.get('msisdn', '')).strip()
+            puk = str(row.get('puk_code', '')).strip() or None
+            tariff_name = str(row.get('tariff', '')).strip()
+            if not (iccid and imsi and msisdn):
+                errors.append(f'Строка {idx}: заполните iccid/imsi/msisdn')
+                continue
+            tariff = Tariff.objects.filter(name__iexact=tariff_name).first()
+            if not tariff:
+                errors.append(f'Строка {idx}: тариф \"{tariff_name}\" не найден')
+                continue
+            try:
+                sim = SIM.objects.create(
+                    iccid=iccid,
+                    imsi=imsi,
+                    msisdn=msisdn,
+                    puk_code=puk,
+                    status='free'
+                )
+                contract = Contract.objects.create(
+                    customer=organization,
+                    tariff=tariff,
+                    signed_date=timezone.now().date(),
+                    status='draft',
+                    notes='Загружено через пакетный импорт.'
+                )
+                contract.activate(sim)
+                created += 1
+            except Exception as exc:
+                errors.append(f'Строка {idx}: {exc}')
+                continue
+
+        if created:
+            messages.success(self.request, f'Создано {created} SIM-карт для {organization.get_full_name()}')
+        if errors:
+            messages.warning(self.request, 'Некоторые строки не были импортированы:\n' + '\n'.join(errors[:5]))
+        return redirect('customer_detail', pk=organization.pk)
+
+
+class OrganizationSimTemplateView(RoleRequiredMixin, View):
+    allowed_roles = ['admin', 'supervisor']
+    def get(self, request):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=sim_template.csv'
+        response.write('iccid,imsi,msisdn,puk_code,tariff\n')
+        response.write('1234567890123456789,123456789012345,+996700000001,12345678,Asman Light\n')
+        return response

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Пакетное назначение SIM{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Пакетное назначение SIM-карт</h1>
+    <div class="mb-4">
+        <a href="{% url 'organization_sim_template' %}" class="inline-flex items-center rounded-2xl border border-primary-200 px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50">
+            Скачать шаблон CSV
+        </a>
+    </div>
+    <form method="post" enctype="multipart/form-data" class="bg-white rounded-3xl shadow p-6 space-y-6">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Организация</label>
+            {{ form.organization }}
+            {% if form.organization.errors %}<p class="mt-2 text-sm text-red-600">{{ form.organization.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Файл (CSV/XLSX)</label>
+            {{ form.file }}
+            {% if form.file.errors %}<p class="mt-2 text-sm text-red-600">{{ form.file.errors.0 }}</p>{% endif %}
+            <p class="mt-2 text-xs text-gray-500">{{ form.file.help_text }}</p>
+        </div>
+        <div class="flex justify-end gap-3">
+            <a href="{% url 'customer_list' %}" class="px-4 py-2 border rounded-2xl hover:bg-gray-50">Отмена</a>
+            <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-2xl hover:bg-primary-500">Импортировать</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Главная - Telecom CRM{% endblock %}
+{% block title %}Главная - ASMAN CRM{% endblock %}
 
-{% block page_title %}Добро пожаловать в Telecom CRM{% endblock %}
+{% block page_title %}Добро пожаловать в ASMAN CRM{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
 
 {% block content %}
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -128,19 +133,51 @@
             <span class="mt-2 block text-sm font-medium text-gray-900">Добавить абонента</span>
         </a>
 
-        <a href="/contracts/create/" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+{% if user.is_authenticated %}
+    {% if user.role == 'admin' or user.role == 'operator' or user.role == 'supervisor' %}
+        <a href="{% url 'payment_terminal' %}" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2h-5l-3 3-3-3H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
             </svg>
-            <span class="mt-2 block text-sm font-medium text-gray-900">Создать договор</span>
+            <span class="mt-2 block text-sm font-medium text-gray-900">Терминал оплаты</span>
         </a>
+        <a href="{% url 'phone_emulator' %}" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h4l1-2h4l1 2z" />
+            </svg>
+            <span class="mt-2 block text-sm font-medium text-gray-900">Эмулятор телефона</span>
+        </a>
+    {% endif %}
+    {% if user.role == 'admin' or user.role == 'supervisor' %}
+        <a href="{% url 'traffic_emulator' %}" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h10M4 17h6" />
+            </svg>
+            <span class="mt-2 block text-sm font-medium text-gray-900">Эмулятор трафика</span>
+        </a>
+    {% endif %}
+{% endif %}
+    </div>
+</div>
 
-        <a href="/payments/create/" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <span class="mt-2 block text-sm font-medium text-gray-900">Принять платеж</span>
-        </a>
+<!-- Нагрузка сети -->
+<div class="mt-8">
+    <div class="overflow-hidden rounded-lg bg-white shadow">
+        <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-medium text-gray-900">Нагрузка сети</h3>
+                <p class="text-sm text-gray-500">Статистика по звонкам, SMS и трафику</p>
+            </div>
+            {% if traffic_snapshot %}
+            <div class="text-right text-sm text-gray-500">
+                <p><span class="font-semibold text-gray-900">{{ traffic_snapshot.calls }}</span> звонков · <span class="font-semibold text-gray-900">{{ traffic_snapshot.sms }}</span> SMS</p>
+                <p><span class="font-semibold text-gray-900">{{ traffic_snapshot.data_mb }}</span> МБ · {{ traffic_snapshot.timestamp|date:"H:i:s" }}</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="p-6">
+            <canvas id="traffic-chart" height="120"></canvas>
+        </div>
     </div>
 </div>
 
@@ -215,9 +252,9 @@
                         <div class="flex items-center space-x-4">
                             <div class="flex-shrink-0">
                                 <span class="inline-flex h-10 w-10 items-center justify-center rounded-full
-                                    {% if payment.transaction_type == 'deposit' %}bg-green-100{% else %}bg-red-100{% endif %}">
-                                    <svg class="h-5 w-5 {% if payment.transaction_type == 'deposit' %}text-green-700{% else %}text-red-700{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        {% if payment.transaction_type == 'deposit' %}
+                                    {% if payment.transaction_type == 'payment' %}bg-green-100{% else %}bg-red-100{% endif %}">
+                                    <svg class="h-5 w-5 {% if payment.transaction_type == 'payment' %}text-green-700{% else %}text-red-700{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        {% if payment.transaction_type == 'payment' %}
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                         {% else %}
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
@@ -235,8 +272,8 @@
                                 </p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-medium {% if payment.transaction_type == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">
-                                    {% if payment.transaction_type == 'deposit' %}+{% else %}-{% endif %}{{ payment.amount }} сом
+                                <p class="text-sm font-medium {% if payment.transaction_type == 'payment' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if payment.transaction_type == 'payment' %}+{% else %}-{% endif %}{{ payment.amount }} сом
                                 </p>
                                 <p class="text-xs text-gray-500">
                                     {{ payment.get_payment_method_display }}
@@ -302,4 +339,48 @@
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{{ block.super }}
+<script>
+const trafficCtx = document.getElementById('traffic-chart');
+if (trafficCtx) {
+    const trafficChart = new Chart(trafficCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'Звонки', data: [], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', tension: 0.3, fill: true },
+                { label: 'SMS', data: [], borderColor: '#f97316', backgroundColor: 'rgba(249,115,22,0.15)', tension: 0.3, fill: true },
+                { label: 'Данные (МБ)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)', tension: 0.3, fill: true }
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { position: 'bottom' } },
+        }
+    });
+
+    async function refreshTrafficMetrics() {
+        try {
+            const response = await fetch("{% url 'traffic_metrics_data' %}");
+            if (!response.ok) return;
+            const payload = await response.json();
+            trafficChart.data.labels = payload.labels;
+            trafficChart.data.datasets[0].data = payload.calls;
+            trafficChart.data.datasets[1].data = payload.sms;
+            trafficChart.data.datasets[2].data = payload.data;
+            trafficChart.update();
+        } catch (error) {
+            console.warn('Не удалось обновить трафик', error);
+        }
+    }
+
+    refreshTrafficMetrics();
+    setInterval(refreshTrafficMetrics, 5000);
+}
+</script>
 {% endblock %}

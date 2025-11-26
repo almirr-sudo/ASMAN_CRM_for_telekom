@@ -8,9 +8,29 @@
             <div><dt class="text-sm text-gray-500">Дата</dt><dd class="font-medium">{{ payment.payment_date|date:"d.m.Y H:i" }}</dd></div>
             <div><dt class="text-sm text-gray-500">Договор</dt><dd><a href="{% url 'contract_detail' payment.contract.id %}" class="text-primary-600">{{ payment.contract.number }}</a></dd></div>
             <div><dt class="text-sm text-gray-500">Тип</dt><dd>{{ payment.get_transaction_type_display }}</dd></div>
-            <div><dt class="text-sm text-gray-500">Сумма</dt><dd class="text-2xl font-bold {% if payment.transaction_type == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">{{ payment.amount }} ₸</dd></div>
-            <div><dt class="text-sm text-gray-500">Способ оплаты</dt><dd>{{ payment.get_method_display }}</dd></div>
-            <div><dt class="text-sm text-gray-500">Статус</dt><dd>{% if payment.status == 'completed' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded">Завершен</span>{% endif %}</dd></div>
+            <div><dt class="text-sm text-gray-500">Сумма</dt>
+                {% if payment.transaction_type == 'charge' %}
+                <dd class="text-2xl font-bold text-red-600">-{{ payment.amount }} с</dd>
+                {% else %}
+                <dd class="text-2xl font-bold text-green-600">+{{ payment.amount }} с</dd>
+                {% endif %}
+            </div>
+            <div><dt class="text-sm text-gray-500">Способ оплаты</dt><dd>{{ payment.get_payment_method_display }}</dd></div>
+            <div><dt class="text-sm text-gray-500">Статус</dt>
+                <dd>
+                    {% if payment.status == 'success' or payment.status == 'completed' %}
+                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Завершен</span>
+                    {% elif payment.status == 'pending' %}
+                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">В обработке</span>
+                    {% elif payment.status == 'failed' %}
+                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded">Отклонен</span>
+                    {% elif payment.status == 'processing' %}
+                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">Обрабатывается</span>
+                    {% elif payment.status == 'refunded' %}
+                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">Возврат</span>
+                    {% endif %}
+                </dd>
+            </div>
         </dl>
     </div>
 </div>

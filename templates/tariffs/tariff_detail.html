@@ -4,7 +4,7 @@
 <div class="max-w-4xl mx-auto px-4 py-8">
     <div class="flex justify-between mb-6"><h1 class="text-3xl font-bold">{{ tariff.name }}</h1><a href="{% url 'tariff_edit' tariff.id %}" class="bg-primary-600 text-white px-4 py-2 rounded">Редактировать</a></div>
     <div class="grid grid-cols-3 gap-4 mb-6">
-        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Абонплата</p><p class="text-2xl font-bold">{{ tariff.monthly_fee }} ₸/мес</p></div>
+        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Абонплата</p><p class="text-2xl font-bold">{{ tariff.monthly_fee }} с/мес</p></div>
         <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Всего договоров</p><p class="text-2xl font-bold">{{ contracts_count }}</p></div>
         <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Активных договоров</p><p class="text-2xl font-bold text-green-600">{{ active_contracts_count }}</p></div>
     </div>
@@ -24,9 +24,9 @@
                 <div><dt class="text-sm text-gray-500">Включенные минуты</dt><dd>{{ tariff.minutes_included|default:"Безлимит" }}</dd></div>
                 <div><dt class="text-sm text-gray-500">Включенные SMS</dt><dd>{{ tariff.sms_included|default:"Безлимит" }}</dd></div>
                 <div><dt class="text-sm text-gray-500">Включенный интернет</dt><dd>{{ tariff.data_gb_included|default:"Безлимит" }} ГБ</dd></div>
-                <div class="pt-2 border-t"><dt class="text-sm text-gray-500">Сверх лимита - минута</dt><dd>{{ tariff.minute_overage_cost|default:"0" }} ₸</dd></div>
-                <div><dt class="text-sm text-gray-500">Сверх лимита - SMS</dt><dd>{{ tariff.sms_overage_cost|default:"0" }} ₸</dd></div>
-                <div><dt class="text-sm text-gray-500">Сверх лимита - ГБ</dt><dd>{{ tariff.data_gb_overage_cost|default:"0" }} ₸</dd></div>
+                <div class="pt-2 border-t"><dt class="text-sm text-gray-500">Сверх лимита - минута</dt><dd>{{ tariff.minute_overage_cost|default:"0" }} с</dd></div>
+                <div><dt class="text-sm text-gray-500">Сверх лимита - SMS</dt><dd>{{ tariff.sms_overage_cost|default:"0" }} с</dd></div>
+                <div><dt class="text-sm text-gray-500">Сверх лимита - ГБ</dt><dd>{{ tariff.data_gb_overage_cost|default:"0" }} с</dd></div>
             </dl>
         </div>
     </div>

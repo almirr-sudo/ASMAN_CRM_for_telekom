@@ -6,6 +6,8 @@ from django.db import transaction
 from .models import Payment
 from .serializers import PaymentSerializer, PaymentListSerializer, PaymentCreateSerializer
 
+SUCCESS_STATUSES = ['success', 'completed']
+
 
 class PaymentViewSet(viewsets.ModelViewSet):
     """
@@ -104,27 +106,29 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def statistics(self, request):
         """Получить статистику по платежам"""
         from django.db.models import Sum, Count, Avg
-        from django.db.models import Q
+
+        successful_qs = Payment.objects.filter(status__in=SUCCESS_STATUSES)
 
         stats = {
             'total': Payment.objects.count(),
             'pending': Payment.objects.filter(status='pending').count(),
-            'completed': Payment.objects.filter(status='completed').count(),
+            'processing': Payment.objects.filter(status='processing').count(),
+            'completed': successful_qs.count(),
             'failed': Payment.objects.filter(status='failed').count(),
-            'cancelled': Payment.objects.filter(status='cancelled').count(),
-            'total_amount': Payment.objects.filter(status='completed').aggregate(Sum('amount'))['amount__sum'] or 0,
-            'avg_payment': Payment.objects.filter(status='completed').aggregate(Avg('amount'))['amount__avg'] or 0,
+            'refunded': Payment.objects.filter(status='refunded').count(),
+            'total_amount': successful_qs.aggregate(total=Sum('amount'))['total'] or 0,
+            'avg_payment': successful_qs.aggregate(avg=Avg('amount'))['avg'] or 0,
             'by_method': dict(
-                Payment.objects.filter(status='completed').values('payment_method')
+                successful_qs.values('payment_method')
                 .annotate(count=Count('id'), total=Sum('amount'))
                 .values_list('payment_method', 'total')
             ),
-            'deposits': Payment.objects.filter(
-                transaction_type='deposit', status='completed'
-            ).aggregate(Sum('amount'))['amount__sum'] or 0,
-            'deductions': Payment.objects.filter(
-                transaction_type='deduction', status='completed'
-            ).aggregate(Sum('amount'))['amount__sum'] or 0,
+            'deposits': successful_qs.filter(
+                transaction_type='payment'
+            ).aggregate(total=Sum('amount'))['total'] or 0,
+            'deductions': successful_qs.filter(
+                transaction_type='charge'
+            ).aggregate(total=Sum('amount'))['total'] or 0,
         }
         return Response(stats)
 

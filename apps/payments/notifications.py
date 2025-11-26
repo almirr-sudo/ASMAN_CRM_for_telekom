@@ -82,28 +82,28 @@ class PaymentNotifications:
         if customer.email:
             subject = f"Платеж #{payment.id} успешно обработан"
             body = f"""
-Здравствуйте, {customer.firstname} {customer.lastname}!
+Здравствуйте, {customer.get_full_name()}!
 
 Ваш платеж успешно обработан.
 
 Детали платежа:
 - Номер договора: {contract.number}
-- Сумма: {payment.amount} ₸
+- Сумма: {payment.amount} c
 - Дата: {payment.payment_date.strftime('%d.%m.%Y %H:%M')}
 - Способ оплаты: {payment.get_payment_method_display()}
 
-Текущий баланс: {contract.balance} ₸
+Текущий баланс: {contract.balance} c
 
 Спасибо за своевременную оплату!
 
 С уважением,
-Команда Телеком CRM
+Команда ASMAN CRM
             """
             NotificationService.send_email(customer.email, subject, body)
 
         # SMS уведомление
         if customer.phone:
-            message = f"Платеж {payment.amount} ₸ успешно зачислен. Баланс: {contract.balance} ₸. Договор {contract.number}"
+            message = f"Платеж {payment.amount} c успешно зачислен. Баланс: {contract.balance} c. Договор {contract.number}"
             NotificationService.send_sms(customer.phone, message)
 
     @staticmethod
@@ -122,26 +122,26 @@ class PaymentNotifications:
         if customer.email:
             subject = f"Платеж #{payment.id} отклонен"
             body = f"""
-Здравствуйте, {customer.firstname} {customer.lastname}!
+Здравствуйте, {customer.get_full_name()}!
 
 К сожалению, ваш платеж был отклонен.
 
 Детали платежа:
 - Номер договора: {contract.number}
-- Сумма: {payment.amount} ₸
+- Сумма: {payment.amount} c
 - Дата: {payment.payment_date.strftime('%d.%m.%Y %H:%M')}
 - Причина отказа: {reason or 'Не указана'}
 
 Пожалуйста, попробуйте повторить оплату или свяжитесь с нашей службой поддержки.
 
 С уважением,
-Команда Телеком CRM
+Команда ASMAN CRM
             """
             NotificationService.send_email(customer.email, subject, body)
 
         # SMS уведомление
         if customer.phone:
-            message = f"Платеж {payment.amount} ₸ отклонен. Договор {contract.number}. Свяжитесь с поддержкой."
+            message = f"Платеж {payment.amount} c отклонен. Договор {contract.number}. Свяжитесь с поддержкой."
             NotificationService.send_sms(customer.phone, message)
 
 
@@ -168,27 +168,27 @@ class ContractNotifications:
         if customer.email:
             subject = f"Низкий баланс на договоре {contract.number}"
             body = f"""
-Здравствуйте, {customer.firstname} {customer.lastname}!
+Здравствуйте, {customer.get_full_name()}!
 
 Баланс на вашем договоре близок к нулю или отрицательный.
 
-Текущий баланс: {contract.balance} ₸
+Текущий баланс: {contract.balance} c
 Номер договора: {contract.number}
 Тариф: {contract.tariff.name}
-Абонентская плата: {contract.tariff.monthly_fee} ₸/мес
+Абонентская плата: {contract.tariff.monthly_fee} c/мес
 
 {'⚠️ Ваш договор может быть приостановлен при отрицательном балансе!' if contract.balance < 0 else 'Пожалуйста, пополните баланс для продолжения обслуживания.'}
 
 Для пополнения баланса обратитесь в личный кабинет или к оператору.
 
 С уважением,
-Команда Телеком CRM
+Команда ASMAN CRM
             """
             NotificationService.send_email(customer.email, subject, body)
 
         # SMS уведомление
         if customer.phone:
-            message = f"Низкий баланс: {contract.balance} ₸. Договор {contract.number}. Пополните баланс."
+            message = f"Низкий баланс: {contract.balance} c. Договор {contract.number}. Пополните баланс."
             NotificationService.send_sms(customer.phone, message)
 
     @staticmethod
@@ -206,28 +206,28 @@ class ContractNotifications:
         if customer.email:
             subject = f"Договор {contract.number} приостановлен"
             body = f"""
-Здравствуйте, {customer.firstname} {customer.lastname}!
+Здравствуйте, {customer.get_full_name()}!
 
 Ваш договор был приостановлен.
 
 Номер договора: {contract.number}
-Текущий баланс: {contract.balance} ₸
+Текущий баланс: {contract.balance} c
 Причина: {reason or 'Не указана'}
 
 Для возобновления обслуживания необходимо:
 1. Пополнить баланс до положительного значения
 2. Обратиться к оператору для активации
 
-Телефон поддержки: +7 (XXX) XXX-XX-XX
+Телефон поддержки: +996 (XXX) XX-XX-XX
 
 С уважением,
-Команда Телеком CRM
+Команда ASMAN CRM
             """
             NotificationService.send_email(customer.email, subject, body)
 
         # SMS уведомление
         if customer.phone:
-            message = f"Договор {contract.number} приостановлен. Баланс: {contract.balance} ₸. Пополните для возобновления."
+            message = f"Договор {contract.number} приостановлен. Баланс: {contract.balance} c. Пополните для возобновления."
             NotificationService.send_sms(customer.phone, message)
 
     @staticmethod
@@ -244,24 +244,24 @@ class ContractNotifications:
         if customer.email:
             subject = f"Договор {contract.number} возобновлен"
             body = f"""
-Здравствуйте, {customer.firstname} {customer.lastname}!
+Здравствуйте, {customer.get_full_name()}!
 
 Ваш договор успешно возобновлен!
 
 Номер договора: {contract.number}
-Текущий баланс: {contract.balance} ₸
+Текущий баланс: {contract.balance} c
 Тариф: {contract.tariff.name}
 
 Услуги связи снова доступны.
 
 С уважением,
-Команда Телеком CRM
+Команда ASMAN CRM
             """
             NotificationService.send_email(customer.email, subject, body)
 
         # SMS уведомление
         if customer.phone:
-            message = f"Договор {contract.number} возобновлен. Баланс: {contract.balance} ₸. Услуги доступны."
+            message = f"Договор {contract.number} возобновлен. Баланс: {contract.balance} c. Услуги доступны."
             NotificationService.send_sms(customer.phone, message)
 
     @staticmethod
@@ -279,25 +279,25 @@ class ContractNotifications:
         if customer.email:
             subject = f"Списание абонентской платы по договору {contract.number}"
             body = f"""
-Здравствуйте, {customer.firstname} {customer.lastname}!
+Здравствуйте, {customer.get_full_name()}!
 
 С вашего счета списана абонентская плата.
 
 Номер договора: {contract.number}
-Сумма списания: {amount} ₸
+Сумма списания: {amount} c
 Тариф: {contract.tariff.name}
-Текущий баланс: {contract.balance} ₸
+Текущий баланс: {contract.balance} c
 
 Дата следующего списания: {contract.next_billing_date.strftime('%d.%m.%Y') if contract.next_billing_date else 'Не установлена'}
 
 С уважением,
-Команда Телеком CRM
+Команда ASMAN CRM
             """
             NotificationService.send_email(customer.email, subject, body)
 
         # SMS уведомление (отправляем только если баланс стал низким)
         if customer.phone and contract.balance < 100:
-            message = f"Списано {amount} ₸. Баланс: {contract.balance} ₸. Договор {contract.number}"
+            message = f"Списано {amount} c. Баланс: {contract.balance} c. Договор {contract.number}"
             NotificationService.send_sms(customer.phone, message)
 
 

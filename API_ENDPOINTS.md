@@ -175,8 +175,9 @@ Content-Type: application/json
 - `GET /api/payments/statistics/` - Статистика по платежам
 
 ### Фильтрация:
-- `?transaction_type=deposit` - По типу транзакции
-- `?status=completed` - По статусу
+- `?transaction_type=payment` - Пополнения
+- `?transaction_type=charge` - Списания
+- `?status=success` - По успешным платежам (поддерживаются также pending, processing, failed, refunded)
 - `?payment_method=cash` - По методу оплаты
 - `?contract=1` - По договору
 - `?search=TXN-123` - Поиск по transaction_id

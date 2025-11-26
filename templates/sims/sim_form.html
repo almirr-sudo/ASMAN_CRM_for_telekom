@@ -3,34 +3,44 @@
 {% block content %}
 <div class="mx-auto max-w-2xl px-4 py-8">
     <h1 class="text-2xl font-bold mb-6">{% if object %}Редактирование SIM{% else %}Новая SIM-карта{% endif %}</h1>
-    <form method="post" class="bg-white shadow rounded-lg p-6">
+    <form method="post" class="bg-white shadow rounded-3xl p-6 space-y-6">
         {% csrf_token %}
-        <div class="space-y-4">
-            <div><label class="block text-sm font-medium text-gray-900">ICCID <span class="text-red-500">*</span></label>
-                <input type="text" name="iccid" value="{{ form.iccid.value|default:'' }}" required class="mt-2 block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600">
+        {% if form.non_field_errors %}
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+        {% endif %}
+        <div class="grid grid-cols-1 gap-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-900">ICCID <span class="text-red-500">*</span></label>
+                {{ form.iccid }}
                 {% if form.iccid.errors %}<p class="mt-2 text-sm text-red-600">{{ form.iccid.errors.0 }}</p>{% endif %}
             </div>
-            <div><label class="block text-sm font-medium text-gray-900">IMSI</label>
-                <input type="text" name="imsi" value="{{ form.imsi.value|default:'' }}" class="mt-2 block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600">
+            <div>
+                <label class="block text-sm font-medium text-gray-900">IMSI</label>
+                {{ form.imsi }}
+                {% if form.imsi.errors %}<p class="mt-2 text-sm text-red-600">{{ form.imsi.errors.0 }}</p>{% endif %}
             </div>
-            <div><label class="block text-sm font-medium text-gray-900">MSISDN</label>
-                <input type="text" name="msisdn" value="{{ form.msisdn.value|default:'' }}" placeholder="+996XXXXXXXXX" class="mt-2 block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600">
+            <div>
+                <label class="block text-sm font-medium text-gray-900">MSISDN (номер)</label>
+                {{ form.msisdn }}
+                {% if form.msisdn.errors %}<p class="mt-2 text-sm text-red-600">{{ form.msisdn.errors.0 }}</p>{% endif %}
+                <p class="mt-1 text-xs text-gray-500">{{ form.fields.msisdn.help_text }}</p>
             </div>
-            <div><label class="block text-sm font-medium text-gray-900">PUK-код</label>
-                <input type="text" name="puk_code" value="{{ form.puk_code.value|default:'' }}" class="mt-2 block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600">
+            <div>
+                <label class="block text-sm font-medium text-gray-900">PUK-код</label>
+                {{ form.puk_code }}
+                {% if form.puk_code.errors %}<p class="mt-2 text-sm text-red-600">{{ form.puk_code.errors.0 }}</p>{% endif %}
             </div>
-            <div><label class="block text-sm font-medium text-gray-900">Статус <span class="text-red-500">*</span></label>
-                <select name="status" required class="mt-2 block w-full rounded-md border-0 py-1.5 ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600">
-                    <option value="free" {% if form.status.value == 'free' %}selected{% endif %}>Свободна</option>
-                    <option value="active" {% if form.status.value == 'active' %}selected{% endif %}>Активна</option>
-                    <option value="suspended" {% if form.status.value == 'suspended' %}selected{% endif %}>Приостановлена</option>
-                    <option value="blocked" {% if form.status.value == 'blocked' %}selected{% endif %}>Заблокирована</option>
-                </select>
+            <div>
+                <label class="block text-sm font-medium text-gray-900">Статус <span class="text-red-500">*</span></label>
+                {{ form.status }}
+                {% if form.status.errors %}<p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>{% endif %}
             </div>
         </div>
-        <div class="mt-6 flex justify-end space-x-3">
-            <a href="{% if object %}{% url 'sim_detail' object.id %}{% else %}{% url 'sim_list' %}{% endif %}" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50">Отмена</a>
-            <button type="submit" class="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-500">{% if object %}Сохранить{% else %}Создать{% endif %}</button>
+        <div class="flex justify-end space-x-3">
+            <a href="{% if object %}{% url 'sim_detail' object.id %}{% else %}{% url 'sim_list' %}{% endif %}" class="rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50">Отмена</a>
+            <button type="submit" class="rounded-2xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-primary-500">{% if object %}Сохранить{% else %}Создать{% endif %}</button>
         </div>
     </form>
 </div>

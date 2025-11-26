@@ -16,10 +16,16 @@
     <div class="px-4 sm:px-6 lg:mx-auto lg:max-w-screen-xl lg:px-8">
         <div class="py-6 md:flex md:items-center md:justify-between">
             <h1 class="text-2xl font-bold text-gray-900">SIM-карты</h1>
-            <a href="{% url 'sim_create' %}" class="mt-4 md:mt-0 inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-500">
-                <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
-                Добавить SIM
-            </a>
+            <div class="mt-4 md:mt-0 flex gap-3">
+                <a href="{% url 'sim_generate' %}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-primary-700 shadow-sm ring-1 ring-primary-200 hover:bg-primary-50">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-primary-500" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4h12v2H4zM4 9h12v2H4zM4 14h12v2H4z"/></svg>
+                    Генератор SIM
+                </a>
+                <a href="{% url 'sim_create' %}" class="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-500">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
+                    Добавить SIM
+                </a>
+            </div>
         </div>
     </div>
 </div>

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Генератор SIM-карт{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-4">Генерация SIM-карт по шаблону</h1>
+    <p class="text-sm text-gray-500 mb-6">
+        Используйте {num} внутри шаблона. Можно задавать формат, например {num:05} для ведущих нулей.
+    </p>
+    <form method="post" class="bg-white rounded-3xl shadow p-6 space-y-6">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ form.count.label }}</label>
+                {{ form.count }}
+                {% if form.count.errors %}<p class="text-sm text-red-600 mt-1">{{ form.count.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">{{ form.start_number.label }}</label>
+                {{ form.start_number }}
+                {% if form.start_number.errors %}<p class="text-sm text-red-600 mt-1">{{ form.start_number.errors.0 }}</p>{% endif %}
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">{{ form.iccid_template.label }}</label>
+            {{ form.iccid_template }}
+            <p class="text-xs text-gray-500 mt-1">{{ form.iccid_template.help_text }}</p>
+            {% if form.iccid_template.errors %}<p class="text-sm text-red-600 mt-1">{{ form.iccid_template.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">{{ form.imsi_template.label }}</label>
+            {{ form.imsi_template }}
+            <p class="text-xs text-gray-500 mt-1">{{ form.imsi_template.help_text }}</p>
+            {% if form.imsi_template.errors %}<p class="text-sm text-red-600 mt-1">{{ form.imsi_template.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">{{ form.msisdn_template.label }}</label>
+            {{ form.msisdn_template }}
+            <p class="text-xs text-gray-500 mt-1">{{ form.msisdn_template.help_text }}</p>
+            {% if form.msisdn_template.errors %}<p class="text-sm text-red-600 mt-1">{{ form.msisdn_template.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">{{ form.puk_template.label }}</label>
+            {{ form.puk_template }}
+            <p class="text-xs text-gray-500 mt-1">{{ form.puk_template.help_text }}</p>
+            {% if form.puk_template.errors %}<p class="text-sm text-red-600 mt-1">{{ form.puk_template.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="flex justify-end gap-3">
+            <a href="{% url 'sim_list' %}" class="px-4 py-2 border rounded-2xl hover:bg-gray-50">Отмена</a>
+            <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-2xl hover:bg-primary-500">
+                Сгенерировать
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ customer.firstname }} {{ customer.lastname }} - Телеком CRM{% endblock %}
+{% block title %}{{ customer.get_full_name }} - ASMAN CRM{% endblock %}
 
 {% block breadcrumbs %}
 <nav class="flex border-b border-gray-200 bg-white" aria-label="Breadcrumb">
@@ -27,7 +27,7 @@
                 <svg class="h-full w-6 flex-shrink-0 text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor">
                     <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
                 </svg>
-                <span class="ml-4 text-sm font-medium text-gray-500">{{ customer.firstname }} {{ customer.lastname }}</span>
+                <span class="ml-4 text-sm font-medium text-gray-500">{{ customer.get_full_name }}</span>
             </div>
         </li>
     </ol>
@@ -41,7 +41,7 @@
             <div class="min-w-0 flex-1">
                 <div class="flex items-center">
                     <h1 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                        {{ customer.firstname }} {{ customer.lastname }}
+                        {{ customer.get_full_name }}
                     </h1>
                     <span class="ml-4 inline-flex rounded-full px-3 py-1 text-xs font-semibold
                         {% if customer.status == 'active' %}bg-green-100 text-green-800
@@ -49,11 +49,22 @@
                         {% elif customer.status == 'blocked' %}bg-red-100 text-red-800{% endif %}">
                         {% if customer.status == 'active' %}Активный
                         {% elif customer.status == 'suspended' %}Приостановлен
-                        {% elif customer.status == 'blocked' %}Заблокирован{% endif %}
+                        {% elif customer.status == 'blocked' %}Заблокирован
+                        {% else %}Архив{% endif %}
                     </span>
                 </div>
             </div>
             <div class="mt-4 flex md:ml-4 md:mt-0 space-x-3">
+                {% if can_assign_sims %}
+                <a href="{% url 'customer_assign_sims' customer.id %}" class="inline-flex items-center rounded-md bg-primary-50 px-3 py-2 text-sm font-semibold text-primary-700 shadow-sm ring-1 ring-inset ring-primary-100 hover:bg-primary-100">
+                    Добавить SIM
+                </a>
+                {% endif %}
+                {% if can_bulk_upload %}
+                <a href="{% url 'organization_sim_bulk_upload' %}?organization={{ customer.id }}" class="inline-flex items-center rounded-md bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm ring-1 ring-inset ring-indigo-100 hover:bg-indigo-100">
+                    Импорт SIM
+                </a>
+                {% endif %}
                 <a href="{% url 'customer_edit' customer.id %}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
                     <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M2.695 14.763l-1.262 3.154a.5.5 0 00.65.65l3.155-1.262a4 4 0 001.343-.885L17.5 5.5a2.121 2.121 0 00-3-3L3.58 13.42a4 4 0 00-.885 1.343z" />
@@ -96,6 +107,16 @@
                 <div class="px-4 py-5 sm:p-6">
                     <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Основная информация</h3>
                     <dl class="space-y-3">
+                        {% if customer.is_organization %}
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Организация</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ customer.organization_name }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">ИНН/БИН</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ customer.organization_code|default:'-' }}</dd>
+                        </div>
+                        {% endif %}
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Телефон</dt>
                             <dd class="mt-1 text-sm text-gray-900">{{ customer.phone|default:"-" }}</dd>
@@ -108,7 +129,7 @@
                             <dt class="text-sm font-medium text-gray-500">Документ</dt>
                             <dd class="mt-1 text-sm text-gray-900">
                                 {{ customer.get_document_type_display }}<br>
-                                {{ customer.document_number }}
+                        {{ customer.get_passport }}
                             </dd>
                         </div>
                         <div>
@@ -156,12 +177,14 @@
                                         <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold text-green-800">Активный</span>
                                         {% elif contract.status == 'suspended' %}
                                         <span class="inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold text-yellow-800">Приостановлен</span>
-                                        {% elif contract.status == 'closed' %}
-                                        <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold text-gray-800">Закрыт</span>
+                                        {% elif contract.status == 'terminated' %}
+                                        <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold text-gray-800">Расторгнут</span>
+                                        {% else %}
+                                        <span class="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold text-blue-800">Черновик</span>
                                         {% endif %}
                                     </td>
                                     <td class="whitespace-nowrap py-3 text-sm text-gray-500">
-                                        {{ contract.start_date|date:"d.m.Y" }}
+                                        {{ contract.signed_date|date:"d.m.Y" }}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -190,10 +213,10 @@
                                 <p class="text-xs text-gray-500">{{ payment.payment_date|date:"d.m.Y H:i" }}</p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm font-semibold {% if payment.transaction_type == 'deposit' %}text-green-600{% else %}text-red-600{% endif %}">
-                                    {% if payment.transaction_type == 'deposit' %}+{% else %}-{% endif %}{{ payment.amount }} ₸
+                                <p class="text-sm font-semibold {% if payment.transaction_type == 'payment' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {% if payment.transaction_type == 'payment' %}+{% else %}-{% endif %}{{ payment.amount }} с
                                 </p>
-                                <p class="text-xs text-gray-500">{{ payment.get_method_display }}</p>
+                                <p class="text-xs text-gray-500">{{ payment.get_payment_method_display }}</p>
                             </div>
                         </div>
                         {% endfor %}

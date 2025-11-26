@@ -41,10 +41,10 @@ class Payment(models.Model):
 
     # Сумма (положительная для пополнений, отрицательная для списаний)
     amount = models.DecimalField(
-        'Сумма (₽)',
+        'Сумма (с)',
         max_digits=10,
         decimal_places=2,
-        help_text='Сумма платежа в рублях'
+        help_text='Сумма платежа в сомах'
     )
 
     # Дата и время платежа
@@ -79,6 +79,7 @@ class Payment(models.Model):
         ('mobile_payment', 'Мобильный платеж'),
         ('auto_payment', 'Автоплатеж'),
         ('system', 'Системная операция'),
+        ('terminal', 'Терминал самообслуживания'),
     ]
 
     payment_method = models.CharField(
@@ -127,7 +128,7 @@ class Payment(models.Model):
 
     # Баланс после транзакции (для отслеживания истории)
     balance_after = models.DecimalField(
-        'Баланс после операции (₽)',
+        'Баланс после операции (с)',
         max_digits=10,
         decimal_places=2,
         null=True,
@@ -159,7 +160,7 @@ class Payment(models.Model):
 
     def __str__(self):
         sign = "+" if self.amount > 0 else ""
-        return f"{self.get_transaction_type_display()}: {sign}{self.amount}₽ (Договор №{self.contract.number})"
+        return f"{self.get_transaction_type_display()}: {sign}{self.amount}с (Договор №{self.contract.number})"
 
     def clean(self):
         """Дополнительная валидация модели"""

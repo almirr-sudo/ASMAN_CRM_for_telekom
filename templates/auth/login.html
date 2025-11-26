@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Вход в систему | ASMAN CRM{% endblock %}
+
+{% block public_content %}
+<div class="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-indigo-900 px-4 py-10 text-white">
+    <div class="mx-auto max-w-6xl grid gap-10 lg:grid-cols-2 items-center">
+        <div class="space-y-6">
+            <p class="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-sm uppercase tracking-wide text-primary-100 shadow">
+                Защищённый доступ
+            </p>
+                <h1 class="text-4xl font-extrabold leading-tight sm:text-5xl">
+                    Управляйте всей телеком-инфраструктурой Кыргызской Республики из единой панели
+            </h1>
+            <p class="text-lg text-primary-100">
+                Войдите в систему, чтобы отслеживать статус абонентов, SIM-карт, платежей и тикетов в реальном времени.
+            </p>
+            <div class="grid gap-4">
+                <div class="flex items-start gap-3">
+                    <span class="mt-1 h-5 w-5 rounded-full bg-emerald-300 text-primary-900 flex items-center justify-center font-bold text-xs">1</span>
+                    <div>
+                        <p class="font-semibold">Единый аккаунт</p>
+                        <p class="text-sm text-primary-100">Доступ к CRM, аналитике и отчётам по одной учетной записи.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="mt-1 h-5 w-5 rounded-full bg-cyan-300 text-primary-900 flex items-center justify-center font-bold text-xs">2</span>
+                    <div>
+                        <p class="font-semibold">Рабочие сценарии</p>
+                        <p class="text-sm text-primary-100">Создавайте абонентов, заявки и платежи быстрее за счёт готовых шаблонов.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="mt-1 h-5 w-5 rounded-full bg-indigo-300 text-primary-900 flex items-center justify-center font-bold text-xs">3</span>
+                    <div>
+                        <p class="font-semibold">Повышенная безопасность</p>
+                        <p class="text-sm text-primary-100">Доступ разрешён только сотрудникам. Все действия логируются.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-3xl bg-white/95 p-8 shadow-2xl backdrop-blur">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Вход в ASMAN CRM</h2>
+                        <p class="mt-2 text-sm text-gray-500">Используйте корпоративный логин и пароль.</p>
+                    </div>
+
+                    {% if messages %}
+                    <div class="space-y-2">
+                        {% for message in messages %}
+                        <div class="rounded-2xl border px-4 py-3 text-sm {% if message.tags == 'success' %}border-emerald-100 bg-emerald-50 text-emerald-700{% elif message.tags == 'error' %}border-red-100 bg-red-50 text-red-700{% else %}border-primary-100 bg-primary-50 text-primary-700{% endif %}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                    <div class="rounded-2xl bg-red-50 p-4 text-sm text-red-700 border border-red-100">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="text-sm font-medium text-gray-700">Логин</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.password.id_for_label }}" class="text-sm font-medium text-gray-700">Пароль</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.password.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-3 text-sm text-gray-600">
+                            {{ form.remember_me }}
+                            <span>Запомнить меня на этом устройстве</span>
+                        </label>
+                        <a href="mailto:support@telecom-crm.local" class="text-sm font-medium text-primary-600 hover:text-primary-500">
+                            Нужна помощь?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-primary-600 px-4 py-3 text-base font-semibold text-white shadow-lg shadow-primary-600/40 transition hover:bg-primary-700">
+                        Войти в систему
+                    </button>
+
+                    <p class="text-center text-xs text-gray-500">
+                        Доступ к CRM возможен только для сотрудников оператора связи.
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

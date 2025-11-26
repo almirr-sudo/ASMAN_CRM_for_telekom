@@ -36,7 +36,7 @@
                     <td class="py-3 px-4 text-sm"><a href="{% url 'customer_detail' contract.customer.id %}" class="text-primary-600">{{ contract.customer.get_full_name }}</a></td>
                     <td class="py-3 px-4 text-sm">{{ contract.tariff.name }}</td>
                     <td class="py-3 px-4 text-sm">{{ contract.sim_card.msisdn|default:"-" }}</td>
-                    <td class="py-3 px-4 text-sm {% if contract.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">{{ contract.balance }} ₸</td>
+                    <td class="py-3 px-4 text-sm {% if contract.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">{{ contract.balance }} с</td>
                     <td class="py-3 px-4 text-sm">
                         {% if contract.status == 'active' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Активный</span>
                         {% elif contract.status == 'suspended' %}<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Приостановлен</span>

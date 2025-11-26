@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Договор {{ contract.number }}</title>
+    <style>
+        body { font-family: 'Times New Roman', serif; margin: 40px; }
+        h1 { text-align: center; font-size: 22px; margin-bottom: 20px; }
+        .section { margin-bottom: 24px; }
+        .section h2 { font-size: 16px; margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        td, th { border: 1px solid #ccc; padding: 8px; font-size: 14px; }
+        .signatures { display: flex; justify-content: space-between; margin-top: 60px; }
+        .signatures div { width: 45%; text-align: center; }
+        .btn-print { position: fixed; top: 20px; right: 20px; padding: 10px 16px; background: #2563eb; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; }
+        @media print {
+            .btn-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <a href="#" class="btn-print" onclick="window.print(); return false;">Печать</a>
+    <h1>Договор оказания услуг связи № {{ contract.number }}</h1>
+
+    <div class="section">
+        <h2>1. Стороны договора</h2>
+        <table>
+            <tr>
+                <th>Оператор</th>
+                <td>ASMAN Telecom</td>
+            </tr>
+            <tr>
+                <th>Абонент</th>
+                <td>{{ contract.customer.get_full_name }}</td>
+            </tr>
+            {% if contract.customer.is_organization %}
+            <tr>
+                <th>ИНН/БИН</th>
+                <td>{{ contract.customer.organization_code|default:'-' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <th>Документ</th>
+                <td>{{ contract.customer.get_document_type_display }} № {{ contract.customer.get_passport }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Телефон</th>
+                <td>{{ contract.customer.phone|default:'-' }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>2. Условия подключения</h2>
+        <table>
+            <tr>
+                <th>Тариф</th>
+                <td>{{ contract.tariff.name }}</td>
+            </tr>
+            <tr>
+                <th>Абонентская плата</th>
+                <td>{{ contract.tariff.monthly_fee }} с / мес</td>
+            </tr>
+            <tr>
+                <th>Номер (MSISDN)</th>
+                <td>{{ contract.sim_card.msisdn|default:'-' }}</td>
+            </tr>
+            <tr>
+                <th>Дата заключения</th>
+                <td>{{ contract.signed_date|date:"d.m.Y" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>3. Подписи сторон</h2>
+        <div class="signatures">
+            <div>
+                ________________________<br>
+                Оператор<br>
+                (подпись)
+            </div>
+            <div>
+                ________________________<br>
+                Абонент<br>
+                (подпись)
+            </div>
+        </div>
+    </div>
+</body>
+</html>

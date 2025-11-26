@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Назначить SIM - {{ customer.get_full_name }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-6">Назначить SIM клиенту {{ customer.get_full_name }}</h1>
+    <form method="post" class="bg-white rounded-3xl shadow p-6 space-y-6">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-semibold text-gray-700">Свободные SIM</label>
+            {{ form.sims }}
+            {% if form.sims.errors %}<p class="mt-2 text-sm text-red-600">{{ form.sims.errors.0 }}</p>{% endif %}
+            <p class="mt-2 text-xs text-gray-500">{{ form.sims.help_text }}</p>
+        </div>
+        <div>
+            <label class="block text-sm font-semibold text-gray-700">Тариф</label>
+            {{ form.tariff }}
+            {% if form.tariff.errors %}<p class="mt-2 text-sm text-red-600">{{ form.tariff.errors.0 }}</p>{% endif %}
+        </div>
+        <div class="flex justify-end gap-3">
+            <a href="{% url 'customer_detail' customer.id %}" class="px-4 py-2 border rounded-2xl hover:bg-gray-50">Отмена</a>
+            <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-2xl hover:bg-primary-500">Назначить</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

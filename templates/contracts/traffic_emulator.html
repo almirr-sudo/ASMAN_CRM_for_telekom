@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Эмулятор трафика{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8 space-y-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-sm text-gray-500 uppercase font-semibold">Инструменты</p>
+            <h1 class="text-2xl font-bold text-gray-900">Эмулятор нагрузки сети</h1>
+            <p class="text-sm text-gray-500">Используйте параметры ниже, чтобы сгенерировать нагрузку и проверить биллинг.</p>
+        </div>
+    </div>
+
+    <form method="post" class="bg-white rounded-3xl shadow p-6 space-y-6">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for field in form %}
+            <div>
+                <label class="text-sm font-medium text-gray-700">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}<p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="flex justify-end">
+            <button type="submit" class="inline-flex items-center rounded-2xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500">
+                Запустить симуляцию
+            </button>
+        </div>
+    </form>
+
+    <div class="bg-white rounded-3xl shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-semibold">Последние метрики</h2>
+                <p class="text-sm text-gray-500">обновлено {% if latest_metric %}{{ latest_metric.timestamp|date:"d.m.Y H:i" }}{% else %}--{% endif %}</p>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Время</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Звонки</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">SMS</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Трафик, МБ</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Пополнения</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Списания, с</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for metric in recent_metrics %}
+                    <tr>
+                        <td class="px-4 py-2 text-sm text-gray-900">{{ metric.timestamp|date:"d.m H:i" }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-900">{{ metric.calls }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-900">{{ metric.sms }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-900">{{ metric.data_mb }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-900">{{ metric.topups }}</td>
+                        <td class="px-4 py-2 text-sm text-gray-900">{{ metric.charges }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-4 py-4 text-center text-sm text-gray-500">Метрик пока нет</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

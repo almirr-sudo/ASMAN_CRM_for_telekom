@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Платежный терминал{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="bg-white shadow rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Терминал пополнения ASMAN</h1>
+                <p class="text-sm text-gray-500 mt-1">Введите номер телефона абонента и сумму пополнения. Операция проходит в статусе «В обработке» 20–30 секунд.</p>
+            </div>
+        </div>
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Номер телефона</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+                {% else %}
+                <p class="mt-1 text-xs text-gray-500">Формат: +996XXXXXXXXX</p>
+                {% endif %}
+            </div>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Сумма пополнения</label>
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.amount.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Комментарий</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="mt-1 text-sm text-red-600">{{ form.description.errors.0 }}</p>
+                    {% else %}
+                    <p class="mt-1 text-xs text-gray-500">Опционально для внутренних заметок.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <p>После подтверждения платеж будет в обработке до 30 секунд. Статус обновится автоматически.</p>
+            </div>
+            <button type="submit" class="inline-flex items-center rounded-2xl bg-primary-600 px-6 py-3 text-base font-semibold text-white shadow hover:bg-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                Отправить в обработку
+            </button>
+        </form>
+    </div>
+    <div class="mt-10 bg-white shadow rounded-3xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900">Последние операции терминала</h2>
+                <p class="text-sm text-gray-500">Отображаются 10 последних пополнений.</p>
+            </div>
+        </div>
+        {% if recent_terminal_payments %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Дата</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Абонент</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Номер</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Сумма</th>
+                        <th class="px-4 py-2 text-left text-xs font-semibold text-gray-500 uppercase">Статус</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for payment in recent_terminal_payments %}
+                    <tr>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ payment.payment_date|date:"d.m.Y H:i" }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ payment.contract.customer.get_full_name }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ payment.contract.sim_card.msisdn|default:"-" }}</td>
+                        <td class="px-4 py-3 text-sm font-semibold text-green-600">+{{ payment.amount }} с</td>
+                        <td class="px-4 py-3 text-sm">
+                            {% if payment.status == 'pending' %}
+                            <span class="inline-flex items-center rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">В обработке</span>
+                            {% elif payment.status == 'success' or payment.status == 'completed' %}
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">Завершен</span>
+                            {% elif payment.status == 'failed' %}
+                            <span class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">Отклонен</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-500">Пока нет операций, выполненных через терминал.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

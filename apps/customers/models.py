@@ -47,9 +47,10 @@ class Customer(models.Model):
 
     # Паспортные данные
     DOCUMENT_TYPE_CHOICES = [
-        ('passport', 'Паспорт РФ'),
+        ('passport', 'Паспорт гражданина КР'),
+        ('id_card', 'ID-карта (улуттук паспорт)'),
+        ('driver_license', 'Водительское удостоверение КР'),
         ('foreign_passport', 'Загранпаспорт'),
-        ('driver_license', 'Водительское удостоверение'),
     ]
 
     document_type = models.CharField(
@@ -61,14 +62,14 @@ class Customer(models.Model):
 
     passport_series = models.CharField(
         'Серия паспорта',
-        max_length=4,
-        validators=[RegexValidator(r'^\d{4}$', 'Серия должна содержать 4 цифры')]
+        max_length=10,
+        validators=[RegexValidator(r'^[A-Za-z0-9]{2,10}$', 'Серия может содержать латинские буквы и цифры (2-10 символов)')]
     )
 
     passport_number = models.CharField(
         'Номер паспорта',
-        max_length=6,
-        validators=[RegexValidator(r'^\d{6}$', 'Номер должен содержать 6 цифр')]
+        max_length=12,
+        validators=[RegexValidator(r'^[A-Za-z0-9]{4,12}$', 'Номер может содержать латинские буквы и цифры (4-12 символов)')]
     )
 
     # ИНН
@@ -106,9 +107,36 @@ class Customer(models.Model):
         null=True
     )
 
+    CUSTOMER_TYPE_CHOICES = [
+        ('individual', 'Физическое лицо'),
+        ('organization', 'Организация'),
+    ]
+
+    customer_type = models.CharField(
+        'Тип клиента',
+        max_length=20,
+        choices=CUSTOMER_TYPE_CHOICES,
+        default='individual'
+    )
+
+    organization_name = models.CharField(
+        'Название организации',
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    organization_code = models.CharField(
+        'ИНН/БИН организации',
+        max_length=50,
+        blank=True,
+        null=True
+    )
+
     # Статус абонента
     STATUS_CHOICES = [
         ('active', 'Активный'),
+        ('suspended', 'Приостановлен'),
         ('blocked', 'Заблокирован'),
         ('archived', 'Архивный'),
     ]
@@ -152,14 +180,21 @@ class Customer(models.Model):
     def __str__(self):
         return self.get_full_name()
 
+    def is_organization(self):
+        return self.customer_type == 'organization'
+
     def get_full_name(self):
-        """Возвращает полное ФИО"""
+        """Возвращает отображаемое имя"""
+        if self.is_organization() and self.organization_name:
+            return self.organization_name
         if self.patronymic:
             return f"{self.last_name} {self.first_name} {self.patronymic}"
         return f"{self.last_name} {self.first_name}"
 
     def get_short_name(self):
         """Возвращает фамилию и инициалы"""
+        if self.is_organization() and self.organization_name:
+            return self.organization_name
         if self.patronymic:
             return f"{self.last_name} {self.first_name[0]}. {self.patronymic[0]}."
         return f"{self.last_name} {self.first_name[0]}."
@@ -168,16 +203,37 @@ class Customer(models.Model):
         """Возвращает паспорт в формате XXXX XXXXXX"""
         return f"{self.passport_series} {self.passport_number}"
 
+    @property
+    def firstname(self):
+        """Совместимость с старыми шаблонами"""
+        return self.first_name
+
+    @firstname.setter
+    def firstname(self, value):
+        self.first_name = value
+
+    @property
+    def lastname(self):
+        return self.last_name
+
+    @lastname.setter
+    def lastname(self, value):
+        self.last_name = value
+
+    @property
+    def document_number(self):
+        return self.get_passport().strip()
+
     def clean(self):
         """Дополнительная валидация модели"""
         super().clean()
 
         # Проверка формата паспорта
-        if self.passport_series and not re.match(r'^\d{4}$', self.passport_series):
-            raise ValidationError({'passport_series': 'Серия паспорта должна содержать 4 цифры'})
+        if self.passport_series and not re.match(r'^[A-Za-z0-9]{2,10}$', self.passport_series):
+            raise ValidationError({'passport_series': 'Используйте только латинские буквы и цифры (2-10 символов)'})
 
-        if self.passport_number and not re.match(r'^\d{6}$', self.passport_number):
-            raise ValidationError({'passport_number': 'Номер паспорта должен содержать 6 цифр'})
+        if self.passport_number and not re.match(r'^[A-Za-z0-9]{4,12}$', self.passport_number):
+            raise ValidationError({'passport_number': 'Используйте только латинские буквы и цифры (4-12 символов)'})
 
         # Проверка ИНН (если указан)
         if self.inn and not re.match(r'^\d{10}$|^\d{12}$', self.inn):
@@ -186,6 +242,9 @@ class Customer(models.Model):
         # Проверка телефона
         if self.phone and not re.match(r'^\+996\d{9}$', self.phone):
             raise ValidationError({'phone': 'Телефон должен быть в формате +996XXXXXXXXX'})
+
+        if self.is_organization() and not self.organization_name:
+            raise ValidationError({'organization_name': 'Введите название организации'})
 
     def save(self, *args, **kwargs):
         """Переопределяем save для валидации перед сохранением"""

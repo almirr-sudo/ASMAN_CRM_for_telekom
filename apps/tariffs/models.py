@@ -30,11 +30,11 @@ class Tariff(models.Model):
 
     # Абонентская плата (в рублях)
     monthly_fee = models.DecimalField(
-        'Абонентская плата (₽/мес)',
+        'Абонентская плата (с/мес)',
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
-        help_text='Ежемесячная абонентская плата в рублях'
+        help_text='Ежемесячная абонентская плата в сомах'
     )
 
     # Опции тарифа (минуты, SMS, интернет)
@@ -64,7 +64,7 @@ class Tariff(models.Model):
 
     # Стоимость сверх лимита
     minute_overage_cost = models.DecimalField(
-        'Стоимость минуты сверх лимита (₽)',
+        'Стоимость минуты сверх лимита (с)',
         max_digits=6,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
@@ -73,7 +73,7 @@ class Tariff(models.Model):
     )
 
     sms_overage_cost = models.DecimalField(
-        'Стоимость SMS сверх лимита (₽)',
+        'Стоимость SMS сверх лимита (с)',
         max_digits=6,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
@@ -82,7 +82,7 @@ class Tariff(models.Model):
     )
 
     data_gb_overage_cost = models.DecimalField(
-        'Стоимость 1 ГБ сверх лимита (₽)',
+        'Стоимость 1 ГБ сверх лимита (с)',
         max_digits=6,
         decimal_places=2,
         validators=[MinValueValidator(Decimal('0.00'))],
@@ -149,7 +149,7 @@ class Tariff(models.Model):
 
     def __str__(self):
         status = "✓" if self.is_active else "✗"
-        return f"{status} {self.name} - {self.monthly_fee}₽/мес"
+        return f"{status} {self.name} - {self.monthly_fee}с/мес"
 
     def get_description_short(self):
         """Возвращает краткое описание тарифа"""

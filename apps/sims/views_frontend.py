@@ -2,14 +2,18 @@
 Frontend views для управления SIM-картами.
 """
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+import re
+
+from django.shortcuts import render, redirect
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.contrib import messages
 
 from apps.sims.models import SIM
 from apps.contracts.models import Contract
+from apps.sims.forms import SIMForm, SIMGenerateForm
+from apps.users.permissions import RoleRequiredMixin
 
 
 class SIMListView(ListView):
@@ -82,13 +86,14 @@ class SIMDetailView(DetailView):
         return context
 
 
-class SIMCreateView(CreateView):
+class SIMCreateView(RoleRequiredMixin, CreateView):
     """
     Форма создания новой SIM-карты.
     """
+    allowed_roles = ['admin', 'operator', 'supervisor']
     model = SIM
     template_name = 'sims/sim_form.html'
-    fields = ['iccid', 'imsi', 'msisdn', 'puk_code', 'status']
+    form_class = SIMForm
     success_url = reverse_lazy('sim_list')
 
     def form_valid(self, form):
@@ -96,13 +101,14 @@ class SIMCreateView(CreateView):
         return super().form_valid(form)
 
 
-class SIMUpdateView(UpdateView):
+class SIMUpdateView(RoleRequiredMixin, UpdateView):
     """
     Форма редактирования SIM-карты.
     """
+    allowed_roles = ['admin', 'operator', 'supervisor']
     model = SIM
     template_name = 'sims/sim_form.html'
-    fields = ['iccid', 'imsi', 'msisdn', 'puk_code', 'status']
+    form_class = SIMForm
 
     def get_success_url(self):
         return reverse_lazy('sim_detail', kwargs={'pk': self.object.pk})
@@ -110,3 +116,97 @@ class SIMUpdateView(UpdateView):
     def form_valid(self, form):
         messages.success(self.request, f'Данные SIM-карты {form.instance.iccid} обновлены!')
         return super().form_valid(form)
+
+
+class SIMBulkGenerateView(RoleRequiredMixin, FormView):
+    template_name = 'sims/sim_generate.html'
+    form_class = SIMGenerateForm
+    allowed_roles = ['admin', 'supervisor']
+
+    def normalize_iccid(self, value):
+        digits = re.sub(r'\D', '', value)
+        if len(digits) < 19:
+            digits = digits.ljust(19, '0')
+        if len(digits) > 20:
+            raise ValueError('ICCID должен содержать не более 20 цифр')
+        return digits
+
+    def normalize_imsi(self, value):
+        digits = re.sub(r'\D', '', value)
+        if len(digits) < 15:
+            digits = digits.ljust(15, '0')
+        if len(digits) > 15:
+            raise ValueError('IMSI должен содержать 15 цифр')
+        return digits
+
+    def normalize_msisdn(self, value):
+        digits = re.sub(r'\D', '', value)
+        if digits.startswith('996'):
+            digits = digits[3:]
+        digits = digits[-9:] if len(digits) >= 9 else digits.zfill(9)
+        if len(digits) != 9:
+            raise ValueError('Не удалось получить 9 цифр для номера')
+        return f'+996{digits}'
+
+    def form_valid(self, form):
+        count = form.cleaned_data['count']
+        start = form.cleaned_data['start_number']
+        iccid_template = form.cleaned_data['iccid_template']
+        imsi_template = form.cleaned_data['imsi_template']
+        msisdn_template = form.cleaned_data['msisdn_template']
+        puk_template = form.cleaned_data.get('puk_template')
+
+        created = 0
+        errors = []
+        for i in range(count):
+            num = start + i
+            try:
+                iccid_raw = iccid_template.format(num=num)
+                imsi_raw = imsi_template.format(num=num)
+                msisdn_raw = msisdn_template.format(num=num)
+            except Exception as exc:
+                errors.append(f'{num}: ошибка шаблона - {exc}')
+                continue
+
+            puk_code = None
+            if puk_template:
+                try:
+                    puk_code = puk_template.format(num=num)
+                except Exception as exc:
+                    errors.append(f'{num}: ошибка шаблона PUK - {exc}')
+                    continue
+
+            try:
+                iccid = self.normalize_iccid(iccid_raw)
+                imsi = self.normalize_imsi(imsi_raw)
+                msisdn = self.normalize_msisdn(msisdn_raw)
+            except ValueError as exc:
+                errors.append(f'{num}: {exc}')
+                continue
+            if SIM.objects.filter(iccid=iccid).exists():
+                errors.append(f'ICCID {iccid} уже существует')
+                continue
+            if SIM.objects.filter(imsi=imsi).exists():
+                errors.append(f'IMSI {imsi} уже существует')
+                continue
+            if SIM.objects.filter(msisdn=msisdn).exists():
+                errors.append(f'MSISDN {msisdn} уже существует')
+                continue
+            try:
+                SIM.objects.create(
+                    iccid=iccid,
+                    imsi=imsi,
+                    msisdn=msisdn,
+                    puk_code=puk_code,
+                    status='free'
+                )
+                created += 1
+            except Exception as exc:
+                errors.append(f'{iccid}: {exc}')
+                continue
+
+        if created:
+            messages.success(self.request, f'Сгенерировано {created} SIM-карт')
+        if errors:
+            messages.warning(self.request, 'Ошибки:\n' + '\n'.join(errors[:10]))
+        return redirect('sim_list')

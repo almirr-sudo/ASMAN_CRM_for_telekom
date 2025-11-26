@@ -82,9 +82,9 @@ class Contract(models.Model):
         help_text='Дата расторжения договора'
     )
 
-    # Баланс абонента (в рублях)
+    # Баланс абонента (в сомах)
     balance = models.DecimalField(
-        'Баланс (₽)',
+        'Баланс (с)',
         max_digits=10,
         decimal_places=2,
         default=Decimal('0.00'),
@@ -93,7 +93,7 @@ class Contract(models.Model):
 
     # Общая стоимость (сумма всех платежей - списаний)
     total_cost = models.DecimalField(
-        'Общая стоимость (₽)',
+        'Общая стоимость (с)',
         max_digits=12,
         decimal_places=2,
         default=Decimal('0.00'),
@@ -292,7 +292,7 @@ class Contract(models.Model):
 
         # Если баланс стал отрицательным, приостанавливаем договор
         if self.balance < 0 and self.status == 'active':
-            self.suspend(reason=f'Недостаточно средств на балансе (баланс: {self.balance}₽)')
+            self.suspend(reason=f'Недостаточно средств на балансе (баланс: {self.balance}с)')
 
     def charge_monthly_fee(self):
         """Списание ежемесячной абонентской платы"""
@@ -325,3 +325,27 @@ class Contract(models.Model):
             return 'zero'
         else:
             return 'negative'
+
+
+class TrafficMetric(models.Model):
+    SOURCE_CHOICES = [
+        ('emulator', 'Эмулятор'),
+        ('phone', 'Телефон'),
+        ('import', 'Импорт'),
+    ]
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+    calls = models.PositiveIntegerField(default=0)
+    sms = models.PositiveIntegerField(default=0)
+    data_mb = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    topups = models.PositiveIntegerField(default=0)
+    charges = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    source = models.CharField(max_length=20, choices=SOURCE_CHOICES, default='emulator')
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Метрика трафика'
+        verbose_name_plural = 'Метрики трафика'
+
+    def __str__(self):
+        return f"{self.timestamp:%Y-%m-%d %H:%M} — {self.calls} вызовов, {self.sms} SMS"

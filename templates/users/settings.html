@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Настройки профиля{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <h1 class="text-2xl font-bold">Настройки профиля</h1>
+
+    <form method="post" class="bg-white rounded-3xl shadow p-6 space-y-6">
+        {% csrf_token %}
+        <h2 class="text-lg font-semibold text-gray-900">Контактные данные</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for field in profile_form %}
+            <div>
+                <label class="text-sm font-medium text-gray-700">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <div class="flex justify-end">
+            <button type="submit" name="save_profile" class="inline-flex items-center rounded-2xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500">
+                Сохранить изменения
+            </button>
+        </div>
+    </form>
+
+    <form method="post" class="bg-white rounded-3xl shadow p-6 space-y-6">
+        {% csrf_token %}
+        <h2 class="text-lg font-semibold text-gray-900">Смена пароля</h2>
+        {% for field in password_form %}
+        <div>
+            <label class="text-sm font-medium text-gray-700">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <p class="text-sm text-red-600 mt-1">{{ field.errors.0 }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="flex justify-end">
+            <button type="submit" name="change_password" class="inline-flex items-center rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-primary-700 border border-primary-300 hover:bg-primary-50">
+                Обновить пароль
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
