@@ -215,6 +215,37 @@ class Payment(models.Model):
                 # Отправляем уведомление об успешном платеже
                 if self.transaction_type in ['payment', 'refund']:
                     notify_payment_completed(self)
+                    self._auto_charge_tariff_if_needed()
+
+    def _auto_charge_tariff_if_needed(self):
+        """
+        После пополнения проверяет, можно ли автоматически списать абонплату,
+        чтобы продлить тариф и зафиксировать это списание.
+        """
+        if self.transaction_type != 'payment':
+            return
+
+        contract = self.contract
+        if contract.status != 'active':
+            return
+
+        fee_amount = contract.tariff.monthly_fee
+        if not fee_amount or fee_amount <= 0:
+            return
+
+        from django.utils import timezone
+        from dateutil.relativedelta import relativedelta
+
+        today = timezone.now().date()
+        due_date = contract.next_billing_date or today
+
+        # Обновляем информацию о балансе для цикла
+        contract.refresh_from_db(fields=['balance', 'next_billing_date'])
+        while due_date <= today and contract.balance >= fee_amount:
+            contract.charge_monthly_fee(billing_date=due_date)
+            contract.refresh_from_db(fields=['balance', 'next_billing_date'])
+            due_date = contract.next_billing_date or (due_date + relativedelta(months=1))
+            today = timezone.now().date()
 
     def approve(self, user=None):
         """Подтверждение и обработка платежа"""

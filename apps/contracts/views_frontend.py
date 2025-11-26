@@ -1,11 +1,14 @@
 """Frontend views для договоров."""
 from decimal import Decimal
+import json
 
-from django.views.generic import ListView, DetailView, TemplateView, FormView
+from django.views.generic import ListView, DetailView, TemplateView, FormView, View
 from django.db.models import Q
 from django.contrib import messages
 from django.urls import reverse_lazy, reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 
 from apps.contracts.models import Contract, TrafficMetric
 from apps.contracts.forms import TrafficEmulatorForm
@@ -162,6 +165,8 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
             self._handle_call(contract)
         elif action == 'data':
             self._handle_data(contract)
+        elif action == 'sms':
+            self._handle_sms(contract)
         elif action == 'support':
             self._handle_ticket(contract)
         else:
@@ -238,6 +243,43 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
             f'Израсходовано {data_mb} МБ трафика. Списано {amount} с. Баланс: {contract.balance} с.'
         )
 
+    def _handle_sms(self, contract):
+        request = self.request
+        destination = request.POST.get('sms_destination') or '+996700000000'
+        message = request.POST.get('sms_body') or 'Тестовое SMS'
+        try:
+            count = max(1, int(request.POST.get('sms_count', 1)))
+        except ValueError:
+            count = 1
+
+        rate = (contract.tariff.sms_overage_cost or Decimal('1.00')).quantize(Decimal('0.01'))
+        amount = (rate * Decimal(count)).quantize(Decimal('0.01'))
+        description = f'Эмулятор SMS: {count} сообщений на {destination} («{message[:40]}»)'
+
+        if amount > 0:
+            Payment.objects.create(
+                contract=contract,
+                transaction_type='charge',
+                amount=amount,
+                status='success',
+                payment_method='system',
+                description=description
+            )
+
+        TrafficMetric.objects.create(
+            calls=0,
+            sms=count,
+            data_mb=Decimal('0.00'),
+            topups=0,
+            charges=amount,
+            source='phone'
+        )
+        contract.refresh_from_db()
+        messages.success(
+            request,
+            f'Отправлено {count} SMS. Списано {amount} с. Баланс: {contract.balance} с.'
+        )
+
     def _handle_ticket(self, contract):
         request = self.request
         subject = request.POST.get('subject') or 'Запрос поддержки'
@@ -258,3 +300,63 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
             request,
             f'Создан тикет #{ticket.id}: "{ticket.subject}". Сотрудники поддержки получили уведомление.'
         )
+
+
+class TrafficEmulatorLiveView(RoleRequiredMixin, View):
+    allowed_roles = ['admin', 'supervisor']
+
+    def post(self, request):
+        try:
+            payload = json.loads(request.body or '{}')
+        except json.JSONDecodeError:
+            payload = {}
+
+        def dec(name, default):
+            try:
+                return Decimal(str(payload.get(name, default)))
+            except Exception:
+                return Decimal(str(default))
+
+        def integer(name, default):
+            try:
+                return max(1, int(payload.get(name, default)))
+            except (TypeError, ValueError):
+                return default
+
+        config = EmulatorConfig(
+            clients=integer('clients', 10),
+            call_rate=integer('call_rate', 2),
+            sms_rate=integer('sms_rate', 3),
+            data_rate=dec('data_rate', 25),
+            call_price=dec('call_price', 5),
+            sms_price=dec('sms_price', 1),
+            data_price=dec('data_price', Decimal('0.5')),
+            topup_threshold=dec('topup_threshold', 0),
+            topup_amount=dec('topup_amount', 500),
+            ticks=1,
+        )
+        emulator = TrafficEmulator(config)
+        summary = emulator.run()
+        latest_metric = TrafficMetric.objects.first()
+        return JsonResponse({
+            'calls': summary['total_calls'],
+            'sms': summary['total_sms'],
+            'data': float(summary['total_data']),
+            'topups': summary['topups'],
+            'charges': float(summary['charges']),
+            'latest_metric': latest_metric.timestamp.isoformat() if latest_metric else None,
+        })
+
+
+class ContractTerminateView(RoleRequiredMixin, View):
+    allowed_roles = ['admin', 'operator', 'supervisor']
+
+    def post(self, request, pk):
+        contract = get_object_or_404(Contract, pk=pk)
+        reason = request.POST.get('reason', '').strip()
+        try:
+            contract.terminate(reason=reason)
+            messages.success(request, f'Договор {contract.number} расторгнут.')
+        except ValidationError as exc:
+            messages.error(request, exc.messages[0] if exc.messages else str(exc))
+        return redirect('contract_detail', pk=contract.pk)

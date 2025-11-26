@@ -53,8 +53,9 @@ class TariffDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['contracts_count'] = self.object.contract_set.count()
-        context['active_contracts_count'] = self.object.contract_set.filter(status='active').count()
+        contracts_qs = self.object.contracts.all()
+        context['contracts_count'] = contracts_qs.count()
+        context['active_contracts_count'] = contracts_qs.filter(status='active').count()
         return context
 
 

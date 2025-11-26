@@ -3,9 +3,7 @@ Celery задачи для автоматического биллинга.
 """
 from celery import shared_task
 from django.utils import timezone
-from datetime import timedelta
 from apps.contracts.models import Contract
-from apps.payments.models import Payment
 
 
 @shared_task
@@ -25,13 +23,9 @@ def charge_monthly_fees():
 
     for contract in contracts_to_charge:
         try:
-            # Списываем абонплату
-            contract.charge_monthly_fee()
+            due_date = contract.next_billing_date or today
+            contract.charge_monthly_fee(billing_date=due_date)
             charged_count += 1
-
-            # Устанавливаем следующую дату списания (через месяц)
-            contract.next_billing_date = today + timedelta(days=30)
-            contract.save()
 
         except Exception as e:
             failed_count += 1

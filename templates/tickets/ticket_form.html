@@ -3,19 +3,71 @@
 {% block content %}
 <div class="max-w-3xl mx-auto px-4 py-8">
     <h1 class="text-2xl font-bold mb-6">{% if object %}Редактирование тикета #{{ object.id }}{% else %}Новый тикет{% endif %}</h1>
-    <form method="post" class="bg-white shadow rounded p-6 space-y-4">
+    <form method="post" class="bg-white shadow rounded-3xl p-6 space-y-6">
         {% csrf_token %}
-        <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2"><label class="block text-sm font-medium">Тема <span class="text-red-500">*</span></label><input type="text" name="subject" value="{{ form.subject.value|default:'' }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></div>
-            <div><label class="block text-sm font-medium">Категория</label><select name="category" class="mt-1 block w-full rounded-md border-gray-300"><option value="technical">Техническая</option><option value="billing">Биллинг</option><option value="tariff">Тариф</option><option value="sim">SIM</option><option value="complaint">Жалоба</option><option value="other">Другое</option></select></div>
-            <div><label class="block text-sm font-medium">Приоритет</label><select name="priority" class="mt-1 block w-full rounded-md border-gray-300"><option value="low">Низкий</option><option value="medium">Средний</option><option value="high">Высокий</option><option value="critical">Критический</option></select></div>
-            {% if object %}<div class="col-span-2"><label class="block text-sm font-medium">Статус</label><select name="status" class="mt-1 block w-full rounded-md border-gray-300"><option value="new">Новый</option><option value="in_progress">В работе</option><option value="resolved">Решен</option><option value="closed">Закрыт</option></select></div>{% endif %}
-            <div class="col-span-2"><label class="block text-sm font-medium">Описание</label><textarea name="description" rows="4" class="mt-1 block w-full rounded-md border-gray-300">{{ form.description.value|default:'' }}</textarea></div>
-            {% if object %}<div class="col-span-2"><label class="block text-sm font-medium">Решение</label><textarea name="resolution" rows="3" class="mt-1 block w-full rounded-md border-gray-300">{{ form.resolution.value|default:'' }}</textarea></div>{% endif %}
+        {% if form.non_field_errors %}
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
         </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Абонент</label>
+                {{ form.customer }}
+                {% if form.customer.errors %}<p class="mt-1 text-xs text-red-600">{{ form.customer.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Договор</label>
+                {{ form.contract }}
+                {% if form.contract.errors %}<p class="mt-1 text-xs text-red-600">{{ form.contract.errors.0 }}</p>{% endif %}
+            </div>
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700">Тема <span class="text-red-500">*</span></label>
+                {{ form.subject }}
+                {% if form.subject.errors %}<p class="mt-1 text-xs text-red-600">{{ form.subject.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Категория</label>
+                {{ form.category }}
+                {% if form.category.errors %}<p class="mt-1 text-xs text-red-600">{{ form.category.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Приоритет</label>
+                {{ form.priority }}
+                {% if form.priority.errors %}<p class="mt-1 text-xs text-red-600">{{ form.priority.errors.0 }}</p>{% endif %}
+            </div>
+            {% if is_update %}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Статус</label>
+                {{ form.status }}
+                {% if form.status.errors %}<p class="mt-1 text-xs text-red-600">{{ form.status.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700">Ответственный</label>
+                {{ form.assigned_to }}
+                {% if form.assigned_to.errors %}<p class="mt-1 text-xs text-red-600">{{ form.assigned_to.errors.0 }}</p>{% endif %}
+            </div>
+            {% endif %}
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700">Описание</label>
+                {{ form.description }}
+                {% if form.description.errors %}<p class="mt-1 text-xs text-red-600">{{ form.description.errors.0 }}</p>{% endif %}
+            </div>
+            {% if is_update %}
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700">Решение</label>
+                {{ form.resolution }}
+                {% if form.resolution.errors %}<p class="mt-1 text-xs.text-red-600">{{ form.resolution.errors.0 }}</p>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+
         <div class="flex justify-end gap-3 pt-4">
-            <a href="{% if object %}{% url 'ticket_detail' object.id %}{% else %}{% url 'ticket_list' %}{% endif %}" class="px-4 py-2 border rounded">Отмена</a>
-            <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded">{% if object %}Сохранить{% else %}Создать{% endif %}</button>
+            <a href="{% if object %}{% url 'ticket_detail' object.id %}{% else %}{% url 'ticket_list' %}{% endif %}" class="rounded-2xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Отмена</a>
+            <button type="submit" class="rounded-2xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-500">{% if object %}Сохранить{% else %}Создать{% endif %}</button>
         </div>
     </form>
 </div>

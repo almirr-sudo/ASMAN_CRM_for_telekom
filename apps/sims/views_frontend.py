@@ -4,8 +4,8 @@ Frontend views для управления SIM-картами.
 
 import re
 
-from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, FormView, View
 from django.db.models import Q
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -82,6 +82,7 @@ class SIMDetailView(DetailView):
         # Получаем текущий договор
         if self.object.contract:
             context['current_contract'] = self.object.contract
+        context['can_delete'] = self.object.contract is None
 
         return context
 
@@ -209,4 +210,18 @@ class SIMBulkGenerateView(RoleRequiredMixin, FormView):
             messages.success(self.request, f'Сгенерировано {created} SIM-карт')
         if errors:
             messages.warning(self.request, 'Ошибки:\n' + '\n'.join(errors[:10]))
+        return redirect('sim_list')
+
+
+class SIMDeleteView(RoleRequiredMixin, View):
+    allowed_roles = ['admin', 'supervisor']
+
+    def post(self, request, pk):
+        sim = get_object_or_404(SIM, pk=pk)
+        if sim.contract_id:
+            messages.error(request, 'Нельзя удалить SIM-карту, пока она привязана к договору. Сначала расторгните договор.')
+            return redirect('sim_detail', pk=pk)
+        sim_iccid = sim.iccid
+        sim.delete()
+        messages.success(request, f'SIM-карта {sim_iccid} удалена.')
         return redirect('sim_list')

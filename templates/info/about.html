@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}О системе{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="bg-white shadow rounded-3xl p-8">
+        <p class="text-sm uppercase text-primary-500 font-semibold tracking-wide">ASMAN CRM</p>
+        <h1 class="mt-2 text-3xl font-bold text-gray-900">О системе</h1>
+        <p class="mt-4 text-gray-600">
+            ASMAN CRM — внутренняя платформа для операторов связи Кыргызстана. Система объединяет процессы обслуживания
+            абонентов, выдачи SIM-карт, заключения договоров, биллинга и поддержки.
+        </p>
+        <div class="mt-8 grid gap-6 md:grid-cols-2">
+            <div class="rounded-2xl border border-gray-100 p-5">
+                <h2 class="text-xl font-semibold text-gray-900">Возможности</h2>
+                <ul class="mt-4 space-y-2 text-gray-600">
+                    {% for item in highlights %}
+                    <li class="flex items-start"><span class="mr-2 text-primary-500">•</span>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="rounded-2xl border border-gray-100 p-5">
+                <h2 class="text-xl font-semibold text-gray-900">Технологический стек</h2>
+                <dl class="mt-4 space-y-3 text-gray-600">
+                    {% for label, value in stack %}
+                    <div>
+                        <dt class="text-sm uppercase tracking-wide text-gray-400">{{ label }}</dt>
+                        <dd class="text-base">{{ value }}</dd>
+                    </div>
+                    {% endfor %}
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

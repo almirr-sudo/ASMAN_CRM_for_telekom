@@ -1,0 +1,42 @@
+{% if payments %}
+<div class="flow-root">
+    <ul role="list" class="-my-5 divide-y divide-gray-200">
+        {% for payment in payments %}
+        <li class="py-4">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0">
+                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full
+                        {% if payment.transaction_type == 'payment' %}bg-green-100{% else %}bg-red-100{% endif %}">
+                        <svg class="h-5 w-5
+                            {% if payment.transaction_type == 'payment' %}text-green-700{% else %}text-red-700{% endif %}"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {% if payment.transaction_type == 'payment' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                            {% endif %}
+                        </svg>
+                    </span>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-medium text-gray-900">
+                        {{ payment.contract.customer.get_full_name }}
+                    </p>
+                    <p class="truncate text-sm text-gray-500">
+                        Договор {{ payment.contract.number }} · <span class="text-xs">{{ payment.payment_date|date:"d.m.Y H:i" }}</span>
+                    </p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-medium {% if payment.transaction_type == 'payment' %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if payment.transaction_type == 'payment' %}+{% else %}-{% endif %}{{ payment.amount }} сом
+                    </p>
+                    <p class="text-xs text-gray-500">{{ payment.get_payment_method_display }}</p>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% else %}
+<p class="text-sm text-gray-500">Пока нет платежей</p>
+{% endif %}

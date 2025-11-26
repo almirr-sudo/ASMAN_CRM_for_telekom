@@ -234,7 +234,7 @@ class Contract(models.Model):
         # Отправляем уведомление
         notify_contract_status_change(self, 'active')
 
-    def terminate(self):
+    def terminate(self, reason=''):
         """Расторжение договора"""
         from django.utils import timezone
 
@@ -243,6 +243,10 @@ class Contract(models.Model):
 
         self.status = 'terminated'
         self.termination_date = timezone.now().date()
+        reason_text = (reason or '').strip()
+        if reason_text:
+            note = f"Расторгнут: {reason_text}"
+            self.notes = f"{self.notes or ''}\n{note}".strip()
         self.save()
 
         # Деактивируем SIM
@@ -294,28 +298,41 @@ class Contract(models.Model):
         if self.balance < 0 and self.status == 'active':
             self.suspend(reason=f'Недостаточно средств на балансе (баланс: {self.balance}с)')
 
-    def charge_monthly_fee(self):
+    def charge_monthly_fee(self, billing_date=None, note=''):
         """Списание ежемесячной абонентской платы"""
         from django.utils import timezone
         from dateutil.relativedelta import relativedelta
         from apps.payments.notifications import ContractNotifications
+        from apps.payments.models import Payment
 
         if self.status != 'active':
             raise ValidationError(f'Невозможно списать абонплату для договора со статусом "{self.get_status_display()}"')
 
         # Списываем абонентскую плату
         fee_amount = self.tariff.monthly_fee
-        self.deduct_balance(
-            fee_amount,
-            description=f'Абонентская плата за тариф "{self.tariff.name}"'
+        if fee_amount <= 0:
+            return None
+
+        charge_date = billing_date or timezone.now().date()
+        description = f'Абонентская плата за тариф "{self.tariff.name}"'
+        if note:
+            description = f'{description} ({note})'
+        Payment.objects.create(
+            contract=self,
+            transaction_type='charge',
+            amount=fee_amount,
+            status='success',
+            payment_method='system',
+            description=description
         )
 
         # Обновляем дату следующего списания
-        self.next_billing_date = timezone.now().date() + relativedelta(months=1)
-        self.save()
+        self.next_billing_date = charge_date + relativedelta(months=1)
+        self.save(update_fields=['next_billing_date'])
 
         # Отправляем уведомление о списании
         ContractNotifications.notify_monthly_charge(self, fee_amount)
+        return self.next_billing_date
 
     def get_balance_status(self):
         """Возвращает статус баланса (положительный/отрицательный)"""

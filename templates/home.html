@@ -188,49 +188,11 @@
         <div class="px-6 py-5 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Последние тикеты</h3>
         </div>
-        <div class="p-6">
-            {% if recent_tickets %}
-            <div class="flow-root">
-                <ul role="list" class="-my-5 divide-y divide-gray-200">
-                    {% for ticket in recent_tickets %}
-                    <li class="py-4">
-                        <div class="flex items-center space-x-4">
-                            <div class="flex-shrink-0">
-                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full
-                                    {% if ticket.priority == 'critical' %}bg-red-100{% elif ticket.priority == 'high' %}bg-orange-100{% else %}bg-blue-100{% endif %}">
-                                    <span class="font-medium leading-none
-                                        {% if ticket.priority == 'critical' %}text-red-700{% elif ticket.priority == 'high' %}text-orange-700{% else %}text-blue-700{% endif %}">
-                                        #{{ ticket.id }}
-                                    </span>
-                                </span>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="truncate text-sm font-medium text-gray-900">
-                                    {{ ticket.subject }}
-                                </p>
-                                <p class="truncate text-sm text-gray-500">
-                                    {{ ticket.customer.get_full_name }} ·
-                                    <span class="text-xs">{{ ticket.created_at|date:"d.m.Y H:i" }}</span>
-                                </p>
-                            </div>
-                            <div>
-                                <span class="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium
-                                    {% if ticket.status == 'new' %}bg-blue-100 text-blue-700
-                                    {% elif ticket.status == 'in_progress' %}bg-yellow-100 text-yellow-700
-                                    {% elif ticket.status == 'resolved' %}bg-green-100 text-green-700
-                                    {% else %}bg-gray-100 text-gray-700{% endif %}">
-                                    {{ ticket.get_status_display }}
-                                </span>
-                            </div>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
+        <div class="p-6 space-y-6">
+            <div data-live-url="{% url 'recent_tickets' %}" data-live-interval="10000">
+                {% include "partials/recent_tickets.html" with tickets=recent_tickets %}
             </div>
-            {% else %}
-            <p class="text-sm text-gray-500">Пока нет тикетов</p>
-            {% endif %}
-            <div class="mt-6">
+            <div>
                 <a href="/tickets/" class="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
                     Посмотреть все тикеты
                 </a>
@@ -243,51 +205,11 @@
         <div class="px-6 py-5 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Последние платежи</h3>
         </div>
-        <div class="p-6">
-            {% if recent_payments %}
-            <div class="flow-root">
-                <ul role="list" class="-my-5 divide-y divide-gray-200">
-                    {% for payment in recent_payments %}
-                    <li class="py-4">
-                        <div class="flex items-center space-x-4">
-                            <div class="flex-shrink-0">
-                                <span class="inline-flex h-10 w-10 items-center justify-center rounded-full
-                                    {% if payment.transaction_type == 'payment' %}bg-green-100{% else %}bg-red-100{% endif %}">
-                                    <svg class="h-5 w-5 {% if payment.transaction_type == 'payment' %}text-green-700{% else %}text-red-700{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        {% if payment.transaction_type == 'payment' %}
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                        {% else %}
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                                        {% endif %}
-                                    </svg>
-                                </span>
-                            </div>
-                            <div class="min-w-0 flex-1">
-                                <p class="truncate text-sm font-medium text-gray-900">
-                                    {{ payment.contract.customer.get_full_name }}
-                                </p>
-                                <p class="truncate text-sm text-gray-500">
-                                    Договор {{ payment.contract.number }} ·
-                                    <span class="text-xs">{{ payment.payment_date|date:"d.m.Y H:i" }}</span>
-                                </p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm font-medium {% if payment.transaction_type == 'payment' %}text-green-600{% else %}text-red-600{% endif %}">
-                                    {% if payment.transaction_type == 'payment' %}+{% else %}-{% endif %}{{ payment.amount }} сом
-                                </p>
-                                <p class="text-xs text-gray-500">
-                                    {{ payment.get_payment_method_display }}
-                                </p>
-                            </div>
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
+        <div class="p-6 space-y-6">
+            <div data-live-url="{% url 'recent_payments' %}" data-live-interval="12000">
+                {% include "partials/recent_payments.html" with payments=recent_payments %}
             </div>
-            {% else %}
-            <p class="text-sm text-gray-500">Пока нет платежей</p>
-            {% endif %}
-            <div class="mt-6">
+            <div>
                 <a href="/payments/" class="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
                     Посмотреть все платежи
                 </a>

@@ -4,7 +4,15 @@
 <div class="mx-auto max-w-screen-xl px-4 py-8">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-3xl font-bold">SIM {{ sim.iccid }}</h1>
-        <a href="{% url 'sim_edit' sim.id %}" class="rounded-md bg-primary-600 px-3 py-2 text-sm text-white hover:bg-primary-500">Редактировать</a>
+        <div class="flex gap-3">
+            <a href="{% url 'sim_edit' sim.id %}" class="rounded-md bg-primary-600 px-3 py-2 text-sm text-white hover:bg-primary-500">Редактировать</a>
+            {% if can_delete %}
+            <form method="post" action="{% url 'sim_delete' sim.id %}" onsubmit="return confirm('Удалить SIM-карту {{ sim.iccid }}? Это действие необратимо.');">
+                {% csrf_token %}
+                <button type="submit" class="rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-500">Удалить</button>
+            </form>
+            {% endif %}
+        </div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white shadow rounded-lg p-6">
@@ -32,6 +40,10 @@
                 <div><dt class="text-sm text-gray-500">Тариф</dt><dd class="text-sm">{{ current_contract.tariff.name }}</dd></div>
                 <div><dt class="text-sm text-gray-500">Дата активации</dt><dd class="text-sm">{{ sim.activated_at|date:"d.m.Y H:i"|default:"-" }}</dd></div>
             </dl>
+        </div>
+        {% else %}
+        <div class="bg-white shadow rounded-lg p-6 text-sm text-gray-600">
+            <p>SIM-карта свободна. Вы можете удалить её или привязать к договору.</p>
         </div>
         {% endif %}
     </div>

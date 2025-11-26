@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Документация{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-10 space-y-6">
+    <div class="bg-white shadow rounded-3xl p-8">
+        <p class="text-sm uppercase text-primary-500 font-semibold tracking-wide">Документация</p>
+        <h1 class="mt-2 text-3xl font-bold text-gray-900">Полезные материалы</h1>
+        <p class="mt-4 text-gray-600">
+            Здесь собраны основные документы проекта. Для удобства вы можете открыть их прямо из рабочей среды IDE
+            или скачать копию для ознакомления.
+        </p>
+    </div>
+    <div class="grid gap-4 md:grid-cols-2">
+        {% for doc in documents %}
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col">
+            <h2 class="text-lg font-semibold text-gray-900">{{ doc.title }}</h2>
+            <p class="mt-2 text-sm text-gray-600 flex-1">{{ doc.description }}</p>
+            <a href="{{ doc.url }}" target="_blank" class="mt-4 inline-flex items-center text-primary-600 hover:text-primary-500 text-sm font-semibold">
+                Открыть файл
+                <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7v7m0 0L10 21l-7-7L14 3z"/>
+                </svg>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

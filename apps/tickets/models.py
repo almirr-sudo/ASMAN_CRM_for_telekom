@@ -1,5 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 
 class Ticket(models.Model):
@@ -183,6 +185,33 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"Тикет #{self.id}: {self.subject[:50]} ({self.get_status_display()})"
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            self.broadcast_creation()
+
+    def broadcast_creation(self):
+        channel_layer = get_channel_layer()
+        if not channel_layer:
+            return
+        payload = {
+            'id': self.id,
+            'subject': self.subject,
+            'customer': self.customer.get_full_name(),
+            'priority': self.priority,
+            'status': self.status,
+            'created_at': self.created_at.isoformat(),
+        }
+        try:
+            async_to_sync(channel_layer.group_send)(
+                'ticket_updates',
+                {'type': 'ticket_created', 'payload': payload}
+            )
+        except Exception:
+            # В dev-окружении канал может быть недоступен — просто тихо пропускаем
+            pass
 
     def clean(self):
         """Дополнительная валидация модели"""
