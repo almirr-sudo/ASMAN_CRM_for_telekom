@@ -12,7 +12,7 @@
 {% block content %}
 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
     <!-- Абоненты -->
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card">
         <div class="p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -40,7 +40,7 @@
     </div>
 
     <!-- SIM-карты -->
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card animate-delay-1">
         <div class="p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Договоры -->
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card animate-delay-2">
         <div class="p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -94,7 +94,7 @@
     </div>
 
     <!-- Тикеты -->
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card animate-delay-3">
         <div class="p-6">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -126,7 +126,7 @@
 <div class="mt-8">
     <h2 class="text-lg font-medium text-gray-900">Быстрые действия</h2>
     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <a href="/customers/create/" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+        <a href="/customers/create/" class="relative block rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover-lift glass-panel">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
@@ -135,13 +135,13 @@
 
 {% if user.is_authenticated %}
     {% if user.role == 'admin' or user.role == 'operator' or user.role == 'supervisor' %}
-        <a href="{% url 'payment_terminal' %}" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+        <a href="{% url 'payment_terminal' %}" class="relative block rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover-lift glass-panel">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2h-5l-3 3-3-3H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
             </svg>
             <span class="mt-2 block text-sm font-medium text-gray-900">Терминал оплаты</span>
         </a>
-        <a href="{% url 'phone_emulator' %}" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+        <a href="{% url 'phone_emulator' %}" class="relative block rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover-lift glass-panel">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7h4a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h4l1-2h4l1 2z" />
             </svg>
@@ -149,7 +149,7 @@
         </a>
     {% endif %}
     {% if user.role == 'admin' or user.role == 'supervisor' %}
-        <a href="{% url 'traffic_emulator' %}" class="relative block rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+        <a href="{% url 'traffic_emulator' %}" class="relative block rounded-2xl border-2 border-dashed border-gray-200 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 hover-lift glass-panel">
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16M4 12h10M4 17h6" />
             </svg>
@@ -162,7 +162,7 @@
 
 <!-- Нагрузка сети -->
 <div class="mt-8">
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card">
         <div class="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-medium text-gray-900">Нагрузка сети</h3>
@@ -184,7 +184,7 @@
 <!-- Информационные блоки -->
 <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
     <!-- Последние тикеты -->
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card">
         <div class="px-6 py-5 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Последние тикеты</h3>
         </div>
@@ -201,7 +201,7 @@
     </div>
 
     <!-- Последние платежи -->
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card">
         <div class="px-6 py-5 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Последние платежи</h3>
         </div>
@@ -221,7 +221,7 @@
 <!-- График активности за последние 7 дней -->
 {% if activity_data %}
 <div class="mt-8">
-    <div class="overflow-hidden rounded-lg bg-white shadow">
+    <div class="overflow-hidden rounded-2xl glass-panel animate-card">
         <div class="px-6 py-5 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Активность за последние 7 дней</h3>
         </div>

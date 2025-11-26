@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ASMAN CRM{% endblock %}</title>
-    <link rel="icon" href="{% static 'img/asman-logo.svg' %}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{% static 'img/asman-logo.svg' %}">
+    <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="{% static 'img/favicon.svg' %}">
 
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,6 +40,168 @@
             }
         }
     </script>
+    <style>
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.06), transparent 60%),
+                radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.08), transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.08), transparent 55%),
+                #f4f6fb;
+            overflow-x: hidden;
+        }
+        main {
+            position: relative;
+            z-index: 1;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-card {
+            opacity: 0;
+            animation: fadeInUp 0.65s ease forwards;
+        }
+        .animate-delay-1 { animation-delay: 0.05s; }
+        .animate-delay-2 { animation-delay: 0.1s; }
+        .animate-delay-3 { animation-delay: 0.15s; }
+        .animate-delay-4 { animation-delay: 0.2s; }
+        .auto-animate {
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+            animation-delay: var(--auto-delay, 0s);
+        }
+        .hover-lift {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 35px -25px rgba(37, 99, 235, 0.7);
+        }
+        .hover-lift-sm {
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .hover-lift-sm:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px -18px rgba(37, 99, 235, 0.65);
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.45); }
+            70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2.4s infinite;
+        }
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(255,255,255,0.94), rgba(245,247,255,0.95));
+            border-radius: 24px;
+            box-shadow:
+                0 15px 35px -25px rgba(15, 23, 42, 0.6),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .glass-panel-dark {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.9));
+            border-radius: 24px;
+            box-shadow:
+                0 20px 45px -30px rgba(15, 23, 42, 0.8),
+                inset 0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+        main .bg-white.shadow,
+        main .rounded-lg.bg-white,
+        main .rounded-2xl.bg-white,
+        main .rounded-3xl.bg-white,
+        main .bg-white.rounded-lg,
+        main .bg-white.rounded-2xl,
+        main .bg-white.rounded-3xl,
+        main .bg-white\/95,
+        main .bg-white\/90 {
+            background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(247,249,255,0.95)) !important;
+            border-radius: 22px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow:
+                0 25px 50px -30px rgba(15, 23, 42, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.65);
+        }
+        .btn-gradient {
+            background: linear-gradient(120deg, #2563eb, #7c3aed);
+            color: #fff !important;
+            box-shadow: 0 15px 30px -15px rgba(79, 70, 229, 0.8);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 35px -15px rgba(79, 70, 229, 0.65);
+        }
+        .tag-soft {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(59, 130, 246, 0.1);
+            color: #1d4ed8;
+        }
+        .table-modern {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .table-modern thead {
+            background: linear-gradient(120deg, rgba(37, 99, 235, 0.07), rgba(59, 130, 246, 0.05));
+        }
+        .table-modern thead th {
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: 0.7rem;
+            color: #475569;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+        }
+        .table-modern tbody tr {
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .table-modern tbody tr:hover {
+            background: rgba(59, 130, 246, 0.04);
+            transform: translateX(4px);
+        }
+        .table-modern tbody td {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .table-modern tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .form-shell input,
+        .form-shell select,
+        .form-shell textarea {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            padding: 9px 14px;
+            background: rgba(255,255,255,0.9);
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-shell input:focus,
+        .form-shell select:focus,
+        .form-shell textarea:focus {
+            border-color: rgba(37, 99, 235, 0.7);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            outline: none;
+        }
+        .form-shell label {
+            font-weight: 600;
+            color: #0f172a;
+        }
+    </style>
 
     {% block extra_head %}{% endblock %}
 </head>
@@ -223,20 +385,20 @@
                         <div class="rounded-2xl bg-white/10 p-4 text-white shadow-inner shadow-primary-900/30">
                             <p class="text-sm text-primary-100">Быстрые действия</p>
                             <div class="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
-                                <a href="{% url 'customer_create' %}" class="inline-flex items-center justify-between rounded-xl bg-white/90 px-4 py-3 text-sm font-semibold text-primary-700 shadow hover:bg-white">
+                                <a href="{% url 'customer_create' %}" class="inline-flex items-center justify-between rounded-xl bg-white/90 px-4 py-3 text-sm font-semibold text-primary-700 shadow hover:bg-white hover-lift-sm">
                                     + Абонент
                                     <svg class="h-4 w-4 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
                                 </a>
-                                <a href="{% url 'sim_create' %}" class="inline-flex items-center justify-between rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/40 hover:bg-white/20">
+                                <a href="{% url 'sim_create' %}" class="inline-flex items-center justify-between rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/40 hover:bg-white/20 hover-lift-sm">
                                     + SIM
                                     <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10v10H7zM9 3h6M9 21h6"/>
                                     </svg>
                                 </a>
-                                <a href="{% url 'ticket_create' %}" class="inline-flex items-center justify-between rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/40 hover:bg-white/20">
-                                    + Тикет
+                                <a href="{% url 'ticket_list' %}" class="inline-flex items-center justify-between rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/40 hover:bg-white/20 hover-lift-sm">
+                                    Меню тикетов
                                     <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-9 4v8"/>
                                     </svg>
@@ -359,6 +521,53 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const animateTargets = [
+            'main .glass-panel',
+            'main .glass-panel-dark',
+            'main .bg-white.shadow',
+            'main .rounded-lg.bg-white',
+            'main .rounded-2xl.bg-white',
+            'main .rounded-3xl.bg-white',
+            'main .bg-white.rounded-lg',
+            'main .bg-white.rounded-2xl',
+            'main .bg-white.rounded-3xl',
+            'main .bg-white\\/95',
+            'main .bg-white\\/90',
+            'main .form-shell',
+            '.iphone-screen .glass-tile'
+        ];
+        const animateQuery = animateTargets.join(', ');
+        let autoAnimateCounter = 0;
+
+        function markAnimated(el) {
+            if (!el || el.dataset.autoAnimateApplied === 'true') return;
+            el.dataset.autoAnimateApplied = 'true';
+            el.style.setProperty('--auto-delay', `${(autoAnimateCounter % 8) * 60}ms`);
+            autoAnimateCounter += 1;
+            el.classList.add('auto-animate');
+        }
+
+        function applyAutoAnimation(context) {
+            if (!context) return;
+            if (context.matches && context.matches(animateQuery)) {
+                markAnimated(context);
+            }
+            if (!context.querySelectorAll) return;
+            context.querySelectorAll(animateQuery).forEach(markAnimated);
+        }
+
+        applyAutoAnimation(document);
+
+        const autoObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                mutation.addedNodes.forEach((node) => {
+                    if (!(node instanceof Element)) return;
+                    applyAutoAnimation(node);
+                });
+            });
+        });
+        autoObserver.observe(document.body, { childList: true, subtree: true });
+
         const btn = document.getElementById('notifications-btn');
         const panel = document.getElementById('notifications-panel');
         const badge = document.getElementById('notifications-badge');

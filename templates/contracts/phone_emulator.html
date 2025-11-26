@@ -102,13 +102,13 @@ document.addEventListener('DOMContentLoaded', () => {
 {% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
-    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+<div class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <div class="glass-panel p-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between animate-card">
         <div>
             <h1 class="text-3xl font-bold text-gray-900">Эмулятор телефона абонента</h1>
             <p class="text-gray-500 mt-1">Моделируйте реальные действия клиента: звонки, интернет и обращения в поддержку в интерфейсе, похожем на iPhone.</p>
         </div>
-        <form method="get" class="flex items-center gap-3">
+        <form method="get" class="flex items-center gap-3 form-shell">
             <label class="text-sm font-medium text-gray-600">Выбрать договор</label>
             <select name="contract" class="rounded-2xl border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500" onchange="this.form.submit()">
                 {% for contract in contracts %}
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="space-y-6">
-            <div class="bg-white rounded-3xl shadow p-6 space-y-4">
+            <div class="glass-panel p-6 space-y-4 animate-card">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs uppercase text-gray-400">Абонент</p>
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </dl>
             </div>
 
-            <div class="bg-white rounded-3xl shadow p-6 space-y-4">
+            <div class="glass-panel p-6 space-y-4 animate-card animate-delay-1">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Журнал действий</h3>
                     <span class="text-sm text-gray-500">обновляется в реальном времени</span>
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
     </div>
     {% else %}
-    <div class="rounded-3xl bg-white shadow p-8 text-center text-gray-500">
+    <div class="glass-panel p-8 text-center text-gray-500">
         Нет активных договоров для эмуляции. Создайте хотя бы одного абонента с действующим договором.
     </div>
     {% endif %}

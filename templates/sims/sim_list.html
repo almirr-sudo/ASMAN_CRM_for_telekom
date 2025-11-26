@@ -1,28 +1,42 @@
 {% extends 'base.html' %}
 
-{% block title %}SIM-карты - Телеком CRM{% endblock %}
+{% block title %}SIM-карты - ASMAN CRM{% endblock %}
 
 {% block breadcrumbs %}
-<nav class="flex border-b border-gray-200 bg-white">
-    <ol class="mx-auto flex w-full max-w-screen-xl space-x-4 px-4 sm:px-6 lg:px-8">
-        <li class="flex"><a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-500"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd"/></svg></a></li>
-        <li class="flex"><svg class="h-full w-6 text-gray-200" viewBox="0 0 24 44" fill="currentColor"><path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z"/></svg><span class="ml-4 text-sm font-medium text-gray-500">SIM-карты</span></li>
+<nav class="flex border-b border-transparent bg-transparent" aria-label="Breadcrumb">
+    <ol class="mx-auto flex w-full max-w-screen-xl space-x-4 px-4 sm:px-6 lg:px-8 glass-panel animate-card">
+        <li class="flex items-center">
+            <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-500">
+                <svg class="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </li>
+        <li class="flex items-center">
+            <svg class="h-full w-6 flex-shrink-0 text-gray-200" viewBox="0 0 24 44" fill="currentColor">
+                <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z"/>
+            </svg>
+            <span class="ml-4 text-sm font-medium text-gray-500">SIM-карты</span>
+        </li>
     </ol>
 </nav>
 {% endblock %}
 
 {% block page_header %}
-<div class="bg-white shadow">
+<div class="glass-panel shadow-none">
     <div class="px-4 sm:px-6 lg:mx-auto lg:max-w-screen-xl lg:px-8">
         <div class="py-6 md:flex md:items-center md:justify-between">
-            <h1 class="text-2xl font-bold text-gray-900">SIM-карты</h1>
+            <div>
+                <p class="text-sm uppercase tracking-[0.2em] text-primary-500">Реестр SIM</p>
+                <h1 class="text-3xl font-bold text-gray-900">SIM-карты</h1>
+            </div>
             <div class="mt-4 md:mt-0 flex gap-3">
-                <a href="{% url 'sim_generate' %}" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-primary-700 shadow-sm ring-1 ring-primary-200 hover:bg-primary-50">
+                <a href="{% url 'sim_generate' %}" class="inline-flex items-center rounded-2xl bg-white/90 px-4 py-2 text-sm font-semibold text-primary-700 shadow-sm ring-1 ring-primary-200 hover:bg-primary-50 hover-lift-sm">
                     <svg class="-ml-0.5 mr-1.5 h-5 w-5 text-primary-500" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4h12v2H4zM4 9h12v2H4zM4 14h12v2H4z"/></svg>
                     Генератор SIM
                 </a>
-                <a href="{% url 'sim_create' %}" class="inline-flex items-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-500">
-                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z"/></svg>
+                <a href="{% url 'sim_create' %}" class="inline-flex items-center rounded-2xl px-4 py-2 text-sm font-semibold text-white btn-gradient">
+                    <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5а.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5в-4.5z"/></svg>
                     Добавить SIM
                 </a>
             </div>
@@ -34,31 +48,33 @@
 {% block content %}
 <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8 py-8">
     <div class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-4">
-        <div class="bg-white px-4 py-5 shadow rounded-lg sm:p-6">
+        <div class="glass-panel px-4 py-5 animate-card">
             <dt class="text-sm font-medium text-gray-500">Всего SIM</dt>
             <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ total_count|default:0 }}</dd>
         </div>
-        <div class="bg-white px-4 py-5 shadow rounded-lg sm:p-6">
+        <div class="glass-panel px-4 py-5 animate-card animate-delay-1">
             <dt class="text-sm font-medium text-gray-500">Свободных</dt>
             <dd class="mt-1 text-3xl font-semibold text-blue-600">{{ free_count|default:0 }}</dd>
         </div>
-        <div class="bg-white px-4 py-5 shadow rounded-lg sm:p-6">
+        <div class="glass-panel px-4 py-5 animate-card animate-delay-2">
             <dt class="text-sm font-medium text-gray-500">Активных</dt>
             <dd class="mt-1 text-3xl font-semibold text-green-600">{{ active_count|default:0 }}</dd>
         </div>
-        <div class="bg-white px-4 py-5 shadow rounded-lg sm:p-6">
+        <div class="glass-panel px-4 py-5 animate-card animate-delay-3">
             <dt class="text-sm font-medium text-gray-500">Заблокировано</dt>
             <dd class="mt-1 text-3xl font-semibold text-red-600">{{ blocked_count|default:0 }}</dd>
         </div>
     </div>
 
-    <div class="mb-6 rounded-lg bg-white p-6 shadow">
+    <div class="mb-6 glass-panel p-6 form-shell animate-card">
         <form method="get" class="grid grid-cols-1 gap-4 sm:grid-cols-4">
-            <div><label class="block text-sm font-medium text-gray-900">Поиск</label>
-                <input type="text" name="search" value="{{ current_search }}" placeholder="ICCID, IMSI, MSISDN" class="mt-2 block w-full rounded-md border-0 py-1.5 shadow-sm ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+            <div>
+                <label class="block text-sm font-medium text-gray-900">Поиск</label>
+                <input type="text" name="search" value="{{ current_search }}" placeholder="ICCID, IMSI, MSISDN">
             </div>
-            <div><label class="block text-sm font-medium text-gray-900">Статус</label>
-                <select name="status" class="mt-2 block w-full rounded-md border-0 py-1.5 ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+            <div>
+                <label class="block text-sm font-medium text-gray-900">Статус</label>
+                <select name="status">
                     <option value="">Все</option>
                     <option value="free" {% if current_status == 'free' %}selected{% endif %}>Свободна</option>
                     <option value="active" {% if current_status == 'active' %}selected{% endif %}>Активна</option>
@@ -66,23 +82,24 @@
                     <option value="blocked" {% if current_status == 'blocked' %}selected{% endif %}>Заблокирована</option>
                 </select>
             </div>
-            <div><label class="block text-sm font-medium text-gray-900">Договор</label>
-                <select name="has_contract" class="mt-2 block w-full rounded-md border-0 py-1.5 ring-1 ring-gray-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+            <div>
+                <label class="block text-sm font-medium text-gray-900">Договор</label>
+                <select name="has_contract">
                     <option value="">Все</option>
                     <option value="yes" {% if current_has_contract == 'yes' %}selected{% endif %}>Привязана</option>
                     <option value="no" {% if current_has_contract == 'no' %}selected{% endif %}>Не привязана</option>
                 </select>
             </div>
-            <div class="flex items-end space-x-2">
-                <a href="{% url 'sim_list' %}" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50">Сброс</a>
-                <button type="submit" class="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-500">Применить</button>
+            <div class="flex items-end gap-2">
+                <a href="{% url 'sim_list' %}" class="rounded-2xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover-lift-sm">Сброс</a>
+                <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold text-white btn-gradient">Применить</button>
             </div>
         </form>
     </div>
 
-    <div class="bg-white shadow sm:rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-300">
-            <thead class="bg-gray-50">
+    <div class="glass-panel overflow-hidden animate-card">
+        <table class="table-modern">
+            <thead>
                 <tr>
                     <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">ICCID</th>
                     <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">MSISDN</th>
@@ -93,21 +110,26 @@
                     <th class="relative py-3.5 pl-3 pr-4 sm:pr-6"><span class="sr-only">Действия</span></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 bg-white">
+            <tbody>
                 {% for sim in sims %}
                 <tr class="hover:bg-gray-50">
-                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ sim.iccid }}</td>
+                    <td class="whitespace-nowrap.py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ sim.iccid }}</td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{{ sim.msisdn|default:"-" }}</td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ sim.imsi|default:"-" }}</td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm">
-                        {% if sim.status == 'free' %}<span class="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold text-blue-800">Свободна</span>
-                        {% elif sim.status == 'active' %}<span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold text-green-800">Активна</span>
-                        {% elif sim.status == 'suspended' %}<span class="inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold text-yellow-800">Приостановлена</span>
-                        {% elif sim.status == 'blocked' %}<span class="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold text-red-800">Заблокирована</span>
+                        {% if sim.status == 'free' %}
+                        <span class="tag-soft bg-blue-100 text-blue-700">Свободна</span>
+                        {% elif sim.status == 'active' %}
+                        <span class="tag-soft bg-emerald-100 text-emerald-700">Активна</span>
+                        {% elif sim.status == 'suspended' %}
+                        <span class="tag-soft bg-yellow-100 text-yellow-700">Приостановлена</span>
+                        {% elif sim.status == 'blocked' %}
+                        <span class="tag-soft bg-red-100 text-red-700">Заблокирована</span>
                         {% endif %}
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {% if sim.contract %}<a href="{% url 'customer_detail' sim.contract.customer.id %}" class="text-primary-600 hover:text-primary-900">{{ sim.contract.number }}</a>
+                        {% if sim.contract %}
+                        <a href="{% url 'customer_detail' sim.contract.customer.id %}" class="text-primary-600 hover:text-primary-900">{{ sim.contract.number }}</a>
                         {% else %}-{% endif %}
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ sim.created_at|date:"d.m.Y" }}</td>
@@ -124,15 +146,19 @@
     </div>
 
     {% if is_paginated %}
-    <nav class="mt-6 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3">
-        <div class="hidden sm:block"><p class="text-sm text-gray-700">Показано <span class="font-medium">{{ page_obj.start_index }}</span> - <span class="font-medium">{{ page_obj.end_index }}</span> из <span class="font-medium">{{ paginator.count }}</span></p></div>
-        <div>
+    <nav class="mt-6 glass-panel px-4 py-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between animate-card">
+        <p class="text-sm text-gray-500">Показано {{ page_obj.start_index }}–{{ page_obj.end_index }} из {{ paginator.count }}</p>
+        <div class="flex items-center gap-2">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_has_contract %}&has_contract={{ current_has_contract }}{% endif %}" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 hover:bg-gray-50">Назад</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_has_contract %}&has_contract={{ current_has_contract }}{% endif %}" class="rounded-2xl border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">Назад</a>
+            {% else %}
+            <span class="rounded-2xl border border-gray-100 px-3 py-2 text-sm text-gray-300">Назад</span>
             {% endif %}
-            <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-gray-300">{{ page_obj.number }}</span>
+            <span class="text-sm text-gray-500">Стр. {{ page_obj.number }} / {{ paginator.num_pages }}</span>
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_has_contract %}&has_contract={{ current_has_contract }}{% endif %}" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-300 hover:bg-gray-50">Вперед</a>
+            <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}{% if current_has_contract %}&has_contract={{ current_has_contract }}{% endif %}" class="rounded-2xl border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">Вперёд</a>
+            {% else %}
+            <span class="rounded-2xl border border-gray-100 px-3 py-2 text-sm text-gray-300">Вперёд</span>
             {% endif %}
         </div>
     </nav>

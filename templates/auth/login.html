@@ -6,7 +6,7 @@
 {% block public_content %}
 <div class="min-h-screen bg-gradient-to-br from-primary-900 via-primary-800 to-indigo-900 px-4 py-10 text-white">
     <div class="mx-auto max-w-6xl grid gap-10 lg:grid-cols-2 items-center">
-        <div class="space-y-6">
+        <div class="space-y-6 animate-card">
             <div class="flex items-center gap-3">
                 <img src="{% static 'img/asman-logo.svg' %}" alt="ASMAN CRM" class="h-12 w-12">
                 <div>
@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <div class="rounded-3xl bg-white/95 p-8 shadow-2xl backdrop-blur">
+        <div class="glass-panel bg-white/95 p-8 shadow-2xl backdrop-blur animate-card animate-delay-2">
             <form method="post" novalidate>
                 {% csrf_token %}
                 <div class="space-y-6">

@@ -1,23 +1,45 @@
 {% extends 'base.html' %}
 {% block title %}Договоры{% endblock %}
 {% block content %}
-<div class="max-w-screen-xl mx-auto px-4 py-8">
-    <div class="flex justify-between mb-6"><h1 class="text-3xl font-bold">Договоры</h1></div>
-    <div class="grid grid-cols-3 gap-4 mb-6">
-        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Всего</p><p class="text-3xl font-bold">{{ total_count }}</p></div>
-        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Активных</p><p class="text-3xl font-bold text-green-600">{{ active_count }}</p></div>
-        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Приостановлено</p><p class="text-3xl font-bold text-yellow-600">{{ suspended_count }}</p></div>
+<div class="max-w-screen-xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex flex-col gap-2 animate-card">
+        <p class="text-sm uppercase tracking-[0.2em] text-primary-500">Единый реестр</p>
+        <h1 class="text-3xl font-bold text-gray-900">Договоры</h1>
     </div>
-    <div class="bg-white p-6 shadow rounded mb-6">
-        <form method="get" class="grid grid-cols-3 gap-4">
-            <div><input type="text" name="search" value="{{ current_search }}" placeholder="Поиск по номеру, абоненту" class="w-full rounded border-gray-300 shadow-sm"></div>
-            <div><select name="status" class="w-full rounded border-gray-300"><option value="">Все статусы</option><option value="active" {% if current_status == 'active' %}selected{% endif %}>Активные</option><option value="suspended" {% if current_status == 'suspended' %}selected{% endif %}>Приостановленные</option><option value="terminated" {% if current_status == 'terminated' %}selected{% endif %}>Расторгнутые</option></select></div>
-            <div class="flex gap-2"><a href="{% url 'contract_list' %}" class="px-3 py-2 border rounded">Сброс</a><button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded">Применить</button></div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="glass-panel p-4 animate-card"><p class="text-sm text-gray-500">Всего</p><p class="text-3xl font-bold">{{ total_count }}</p></div>
+        <div class="glass-panel p-4 animate-card animate-delay-1"><p class="text-sm text-gray-500">Активных</p><p class="text-3xl font-bold text-green-600">{{ active_count }}</p></div>
+        <div class="glass-panel p-4 animate-card animate-delay-2"><p class="text-sm text-gray-500">Приостановлено</p><p class="text-3xl font-bold text-yellow-600">{{ suspended_count }}</p></div>
+    </div>
+
+    <div class="glass-panel p-6 form-shell animate-card">
+        <form method="get" class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+                <label class="text-sm font-medium text-gray-700">Поиск</label>
+                <input type="text" name="search" value="{{ current_search }}" placeholder="Номер договора или ФИО">
+            </div>
+            <div>
+                <label class="text-sm font-medium text-gray-700">Статус</label>
+                <select name="status">
+                    <option value="">Все статусы</option>
+                    <option value="active" {% if current_status == 'active' %}selected{% endif %}>Активные</option>
+                    <option value="suspended" {% if current_status == 'suspended' %}selected{% endif %}>Приостановленные</option>
+                    <option value="terminated" {% if current_status == 'terminated' %}selected{% endif %}>Расторгнутые</option>
+                </select>
+            </div>
+            <div class="flex items-end gap-2">
+                {% if current_search or current_status %}
+                <a href="{% url 'contract_list' %}" class="rounded-2xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">Сбросить</a>
+                {% endif %}
+                <button type="submit" class="rounded-2xl px-4 py-2 text-sm font-semibold text-white btn-gradient">Применить</button>
+            </div>
         </form>
     </div>
-    <div class="bg-white shadow rounded overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-300">
-            <thead class="bg-gray-50">
+
+    <div class="glass-panel overflow-hidden animate-card">
+        <table class="table-modern">
+            <thead>
                 <tr>
                     <th class="py-3 px-4 text-left text-sm font-semibold">Номер</th>
                     <th class="py-3 px-4 text-left text-sm font-semibold">Абонент</th>
@@ -29,22 +51,31 @@
                     <th class="py-3 px-4"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
+            <tbody>
                 {% for contract in contracts %}
                 <tr class="hover:bg-gray-50">
-                    <td class="py-3 px-4 text-sm font-medium">{{ contract.number }}</td>
-                    <td class="py-3 px-4 text-sm"><a href="{% url 'customer_detail' contract.customer.id %}" class="text-primary-600">{{ contract.customer.get_full_name }}</a></td>
-                    <td class="py-3 px-4 text-sm">{{ contract.tariff.name }}</td>
-                    <td class="py-3 px-4 text-sm">{{ contract.sim_card.msisdn|default:"-" }}</td>
+                    <td class="py-3 px-4 text-sm font-semibold text-gray-900">{{ contract.number }}</td>
+                    <td class="py-3 px-4 text-sm">
+                        <a href="{% url 'customer_detail' contract.customer.id %}" class="text-primary-600 hover:text-primary-500">
+                            {{ contract.customer.get_full_name }}
+                        </a>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-600">{{ contract.tariff.name }}</td>
+                    <td class="py-3 px-4 text-sm text-gray-600">{{ contract.sim_card.msisdn|default:"-" }}</td>
                     <td class="py-3 px-4 text-sm {% if contract.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">{{ contract.balance }} с</td>
                     <td class="py-3 px-4 text-sm">
-                        {% if contract.status == 'active' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Активный</span>
-                        {% elif contract.status == 'suspended' %}<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Приостановлен</span>
-                        {% elif contract.status == 'terminated' %}<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Расторгнут</span>
+                        {% if contract.status == 'active' %}
+                            <span class="tag-soft bg-emerald-100 text-emerald-700">Активный</span>
+                        {% elif contract.status == 'suspended' %}
+                            <span class="tag-soft bg-yellow-100 text-yellow-700">Приостановлен</span>
+                        {% elif contract.status == 'terminated' %}
+                            <span class="tag-soft bg-gray-100 text-gray-700">Расторгнут</span>
                         {% endif %}
                     </td>
                     <td class="py-3 px-4 text-sm text-gray-500">{{ contract.signed_date|date:"d.m.Y" }}</td>
-                    <td class="py-3 px-4 text-sm text-right"><a href="{% url 'contract_detail' contract.id %}" class="text-primary-600">Просмотр</a></td>
+                    <td class="py-3 px-4 text-sm text-right">
+                        <a href="{% url 'contract_detail' contract.id %}" class="text-primary-600 hover:text-primary-900">Просмотр</a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="8" class="py-12 text-center text-gray-500">Договоры не найдены</td></tr>
@@ -52,5 +83,25 @@
             </tbody>
         </table>
     </div>
+
+    {% if is_paginated %}
+    <div class="glass-panel px-4 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between animate-card">
+        <p class="text-sm text-gray-500">
+            Страница {{ page_obj.number }} из {{ paginator.num_pages }} · {{ paginator.count }} договоров
+        </p>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" class="rounded-2xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Назад</a>
+            {% else %}
+            <span class="rounded-2xl border border-gray-100 px-4 py-2 text-sm text-gray-300">Назад</span>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_search %}&search={{ current_search }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}" class="rounded-2xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Вперёд</a>
+            {% else %}
+            <span class="rounded-2xl border border-gray-100 px-4 py-2 text-sm text-gray-300">Вперёд</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

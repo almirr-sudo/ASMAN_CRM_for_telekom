@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block title %}{% if object %}Редактирование тикета{% else %}Новый тикет{% endif %}{% endblock %}
 {% block content %}
-<div class="max-w-3xl mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-6">{% if object %}Редактирование тикета #{{ object.id }}{% else %}Новый тикет{% endif %}</h1>
-    <form method="post" class="bg-white shadow rounded-3xl p-6 space-y-6">
+<div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <h1 class="text-3xl font-bold text-gray-900 animate-card">{% if object %}Редактирование тикета #{{ object.id }}{% else %}Новый тикет{% endif %}</h1>
+    <form method="post" class="glass-panel p-6 space-y-6 form-shell animate-card">
         {% csrf_token %}
         {% if form.non_field_errors %}
         <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">

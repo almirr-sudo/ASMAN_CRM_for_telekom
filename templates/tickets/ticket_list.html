@@ -1,36 +1,70 @@
 {% extends 'base.html' %}
 {% block title %}Тикеты{% endblock %}
 {% block content %}
-<div class="max-w-screen-xl mx-auto px-4 py-8">
-    <div class="flex justify-between mb-6"><h1 class="text-3xl font-bold">Тикеты поддержки</h1><a href="{% url 'ticket_create' %}" class="bg-primary-600 text-white px-4 py-2 rounded">Создать тикет</a></div>
-    <div class="grid grid-cols-3 gap-4 mb-6">
-        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Всего</p><p class="text-3xl font-bold">{{ total_count }}</p></div>
-        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Открытых</p><p class="text-3xl font-bold text-yellow-600">{{ open_count }}</p></div>
-        <div class="bg-white p-4 shadow rounded"><p class="text-sm text-gray-500">Решенных</p><p class="text-3xl font-bold text-green-600">{{ resolved_count }}</p></div>
+<div class="max-w-screen-xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between animate-card">
+        <div>
+            <p class="text-sm uppercase tracking-[0.2em] text-primary-500">Поддержка</p>
+            <h1 class="text-3xl font-bold text-gray-900">Тикеты</h1>
+        </div>
+        <a href="{% url 'ticket_create' %}" class="inline-flex items-center rounded-2xl px-4 py-2 text-sm font-semibold text-white btn-gradient hover-lift-sm">
+            + Создать тикет
+        </a>
     </div>
-    <div class="bg-white shadow rounded overflow-hidden">
-        <table class="min-w-full divide-y">
-            <thead class="bg-gray-50"><tr><th class="py-3 px-4 text-left text-sm font-semibold">ID</th><th class="py-3 px-4 text-left text-sm font-semibold">Тема</th><th class="py-3 px-4 text-left text-sm font-semibold">Абонент</th><th class="py-3 px-4 text-left text-sm font-semibold">Приоритет</th><th class="py-3 px-4 text-left text-sm font-semibold">Статус</th><th class="py-3 px-4 text-left text-sm font-semibold">Создан</th><th></th></tr></thead>
-            <tbody class="divide-y">
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div class="glass-panel p-4 animate-card"><p class="text-sm text-gray-500">Всего</p><p class="text-3xl font-bold">{{ total_count }}</p></div>
+        <div class="glass-panel p-4 animate-card animate-delay-1"><p class="text-sm text-gray-500">Открытых</p><p class="text-3xl font-bold text-yellow-600">{{ open_count }}</p></div>
+        <div class="glass-panel p-4 animate-card animate-delay-2"><p class="text-sm text-gray-500">Решённых</p><p class="text-3xl font-bold text-green-600">{{ resolved_count }}</p></div>
+    </div>
+
+    <div class="glass-panel overflow-hidden animate-card">
+        <table class="table-modern">
+            <thead>
+                <tr>
+                    <th class="py-3 px-4 text-left text-sm font-semibold">ID</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold">Тема</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold">Абонент</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold">Приоритет</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold">Статус</th>
+                    <th class="py-3 px-4 text-left text-sm font-semibold">Создан</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for ticket in tickets %}
                 <tr class="hover:bg-gray-50">
-                    <td class="py-3 px-4 text-sm font-medium">#{{ ticket.id }}</td>
-                    <td class="py-3 px-4 text-sm"><a href="{% url 'ticket_detail' ticket.id %}" class="text-primary-600">{{ ticket.subject }}</a></td>
-                    <td class="py-3 px-4 text-sm">{{ ticket.customer.get_full_name }}</td>
+                    <td class="py-3 px-4 text-sm font-semibold text-gray-900">#{{ ticket.id }}</td>
                     <td class="py-3 px-4 text-sm">
-                        {% if ticket.priority == 'critical' %}<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Критический</span>
-                        {% elif ticket.priority == 'high' %}<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">Высокий</span>
-                        {% elif ticket.priority == 'medium' %}<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Средний</span>
-                        {% else %}<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Низкий</span>{% endif %}
+                        <a href="{% url 'ticket_detail' ticket.id %}" class="text-primary-600 hover:text-primary-500">{{ ticket.subject }}</a>
+                    </td>
+                    <td class="py-3 px-4 text-sm text-gray-700">{{ ticket.customer.get_full_name }}</td>
+                    <td class="py-3 px-4 text-sm">
+                        {% if ticket.priority == 'critical' %}
+                        <span class="tag-soft bg-red-100 text-red-700">Критический</span>
+                        {% elif ticket.priority == 'high' %}
+                        <span class="tag-soft bg-orange-100 text-orange-700">Высокий</span>
+                        {% elif ticket.priority == 'medium' %}
+                        <span class="tag-soft bg-yellow-100 text-yellow-700">Средний</span>
+                        {% else %}
+                        <span class="tag-soft bg-gray-100 text-gray-700">Низкий</span>
+                        {% endif %}
                     </td>
                     <td class="py-3 px-4 text-sm">
-                        {% if ticket.status == 'new' %}<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Новый</span>
-                        {% elif ticket.status == 'in_progress' %}<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">В работе</span>
-                        {% elif ticket.status == 'resolved' %}<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Решен</span>
-                        {% elif ticket.status == 'closed' %}<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Закрыт</span>{% endif %}
+                        {% if ticket.status == 'new' %}
+                        <span class="tag-soft bg-blue-100 text-blue-700">Новый</span>
+                        {% elif ticket.status == 'in_progress' %}
+                        <span class="tag-soft bg-yellow-100 text-yellow-700">В работе</span>
+                        {% elif ticket.status == 'resolved' %}
+                        <span class="tag-soft bg-emerald-100 text-emerald-700">Решён</span>
+                        {% elif ticket.status == 'closed' %}
+                        <span class="tag-soft bg-gray-100 text-gray-700">Закрыт</span>
+                        {% endif %}
                     </td>
                     <td class="py-3 px-4 text-sm text-gray-500">{{ ticket.created_at|date:"d.m.Y H:i" }}</td>
-                    <td class="py-3 px-4 text-sm text-right"><a href="{% url 'ticket_edit' ticket.id %}" class="text-primary-600">Редактировать</a></td>
+                    <td class="py-3 px-4 text-sm text-right">
+                        <a href="{% url 'ticket_edit' ticket.id %}" class="text-primary-600 hover:text-primary-900">Редактировать</a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="7" class="py-12 text-center text-gray-500">Тикеты не найдены</td></tr>
@@ -38,5 +72,23 @@
             </tbody>
         </table>
     </div>
+
+    {% if is_paginated %}
+    <div class="glass-panel px-4 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between animate-card">
+        <p class="text-sm text-gray-500">Страница {{ page_obj.number }} из {{ paginator.num_pages }}</p>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="rounded-2xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Назад</a>
+            {% else %}
+            <span class="rounded-2xl border border-gray-100 px-4 py-2 text-sm text-gray-300">Назад</span>
+            {% endif %}
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="rounded-2xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Вперёд</a>
+            {% else %}
+            <span class="rounded-2xl border border-gray-100 px-4 py-2 text-sm text-gray-300">Вперёд</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

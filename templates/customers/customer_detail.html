@@ -156,6 +156,7 @@
                                     <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Номер</th>
                                     <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Тариф</th>
                                     <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">SIM</th>
+                                    <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Баланс</th>
                                     <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Статус</th>
                                     <th class="py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Дата</th>
                                 </tr>
@@ -164,13 +165,18 @@
                                 {% for contract in contracts %}
                                 <tr class="hover:bg-gray-50">
                                     <td class="whitespace-nowrap py-3 text-sm font-medium text-primary-600">
-                                        {{ contract.number }}
+                                        <a href="{% url 'contract_detail' contract.id %}" class="hover:underline">
+                                            {{ contract.number }}
+                                        </a>
                                     </td>
                                     <td class="whitespace-nowrap py-3 text-sm text-gray-900">
                                         {{ contract.tariff.name|default:"-" }}
                                     </td>
                                     <td class="whitespace-nowrap py-3 text-sm text-gray-500">
                                         {{ contract.sim_card.msisdn|default:"-" }}
+                                    </td>
+                                    <td class="whitespace-nowrap py-3 text-sm font-semibold {% if contract.balance < 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                                        {{ contract.balance }} с
                                     </td>
                                     <td class="whitespace-nowrap py-3 text-sm">
                                         {% if contract.status == 'active' %}

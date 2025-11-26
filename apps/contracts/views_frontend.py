@@ -55,9 +55,22 @@ class ContractDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['payments'] = self.object.payments.all().order_by('-payment_date')[:10]
+        context['payments'] = self.object.payments.all().order_by('-payment_date')
         context['tickets'] = self.object.tickets.all().order_by('-created_at')[:10]
         return context
+
+
+class ContractNumberRedirectView(View):
+    """
+    Позволяет открывать договор по его номеру (а не по ID).
+    """
+
+    def get(self, request, number):
+        contract = get_object_or_404(
+            Contract,
+            number__iexact=number.strip()
+        )
+        return redirect('contract_detail', pk=contract.pk)
 
 
 class ContractPrintView(DetailView):

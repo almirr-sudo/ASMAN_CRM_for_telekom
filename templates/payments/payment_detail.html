@@ -1,37 +1,69 @@
 {% extends 'base.html' %}
 {% block title %}Платеж #{{ payment.id }}{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-6">Платеж #{{ payment.id }}</h1>
-    <div class="bg-white shadow rounded p-6">
-        <dl class="space-y-3">
-            <div><dt class="text-sm text-gray-500">Дата</dt><dd class="font-medium">{{ payment.payment_date|date:"d.m.Y H:i" }}</dd></div>
-            <div><dt class="text-sm text-gray-500">Договор</dt><dd><a href="{% url 'contract_detail' payment.contract.id %}" class="text-primary-600">{{ payment.contract.number }}</a></dd></div>
-            <div><dt class="text-sm text-gray-500">Тип</dt><dd>{{ payment.get_transaction_type_display }}</dd></div>
-            <div><dt class="text-sm text-gray-500">Сумма</dt>
-                {% if payment.transaction_type == 'charge' %}
-                <dd class="text-2xl font-bold text-red-600">-{{ payment.amount }} с</dd>
-                {% else %}
-                <dd class="text-2xl font-bold text-green-600">+{{ payment.amount }} с</dd>
-                {% endif %}
+<div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <div class="glass-panel p-6 animate-card">
+        <p class="text-sm uppercase tracking-[0.2em] text-primary-500">Платёж</p>
+        <h1 class="text-3xl font-bold text-gray-900">Платеж #{{ payment.id }}</h1>
+    </div>
+
+    <div class="glass-panel p-6 space-y-4 animate-card">
+        <dl class="grid grid-cols-1 gap-4 md:grid-cols-2 text-sm text-gray-600">
+            <div>
+                <dt class="text-gray-500">Дата</dt>
+                <dd class="font-semibold text-gray-900">{{ payment.payment_date|date:"d.m.Y H:i" }}</dd>
             </div>
-            <div><dt class="text-sm text-gray-500">Способ оплаты</dt><dd>{{ payment.get_payment_method_display }}</dd></div>
-            <div><dt class="text-sm text-gray-500">Статус</dt>
+            <div>
+                <dt class="text-gray-500">Договор</dt>
                 <dd>
-                    {% if payment.status == 'success' or payment.status == 'completed' %}
-                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded">Завершен</span>
-                    {% elif payment.status == 'pending' %}
-                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">В обработке</span>
-                    {% elif payment.status == 'failed' %}
-                        <span class="bg-red-100 text-red-800 px-2 py-1 rounded">Отклонен</span>
-                    {% elif payment.status == 'processing' %}
-                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">Обрабатывается</span>
-                    {% elif payment.status == 'refunded' %}
-                        <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded">Возврат</span>
-                    {% endif %}
+                    <a href="{% url 'contract_detail' payment.contract.id %}" class="text-primary-600 hover:text-primary-500">
+                        {{ payment.contract.number }}
+                    </a>
                 </dd>
             </div>
+            <div>
+                <dt class="text-gray-500">Тип операции</dt>
+                <dd class="font-semibold">{{ payment.get_transaction_type_display }}</dd>
+            </div>
+            <div>
+                <dt class="text-gray-500">Способ оплаты</dt>
+                <dd>{{ payment.get_payment_method_display }}</dd>
+            </div>
         </dl>
+
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="rounded-2xl bg-gray-50 px-4 py-5">
+                <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Сумма</p>
+                {% if payment.transaction_type == 'charge' %}
+                <p class="text-3xl font-bold text-red-600 mt-2">-{{ payment.amount }} с</p>
+                {% else %}
+                <p class="text-3xl font-bold text-green-600 mt-2">+{{ payment.amount }} с</p>
+                {% endif %}
+            </div>
+            <div class="rounded-2xl bg-gray-50 px-4 py-5">
+                <p class="text-xs uppercase tracking-[0.2em] text-gray-400">Статус</p>
+                <div class="mt-2">
+                    {% if payment.status == 'success' or payment.status == 'completed' %}
+                        <span class="tag-soft bg-emerald-100 text-emerald-700">Завершен</span>
+                    {% elif payment.status == 'pending' %}
+                        <span class="tag-soft bg-yellow-100 text-yellow-700">В обработке</span>
+                    {% elif payment.status == 'failed' %}
+                        <span class="tag-soft bg-red-100 text-red-700">Отклонен</span>
+                    {% elif payment.status == 'processing' %}
+                        <span class="tag-soft bg-blue-100 text-blue-700">Обрабатывается</span>
+                    {% elif payment.status == 'refunded' %}
+                        <span class="tag-soft bg-gray-100 text-gray-700">Возврат</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {% if payment.description %}
+        <div class="rounded-2xl bg-gray-50 px-4 py-4">
+            <p class="text-xs uppercase tracking-[0.3em] text-gray-400">Описание</p>
+            <p class="mt-2 text-sm text-gray-700 whitespace-pre-line">{{ payment.description }}</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
