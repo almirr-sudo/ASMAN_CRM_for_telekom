@@ -4,7 +4,7 @@
 {% block extra_head %}
 <style>
 .iphone-shell {
-    width: 360px;
+    width: 430px;
     border-radius: 45px;
     padding: 22px 18px 28px;
     background: linear-gradient(145deg, #15161d, #1f2130);
@@ -12,7 +12,7 @@
     border: 6px solid #05060a;
 }
 .iphone-notch {
-    width: 180px;
+    width: 220px;
     height: 26px;
     background: #05060a;
     border-bottom-left-radius: 20px;
@@ -33,12 +33,12 @@
 .iphone-screen {
     background: radial-gradient(circle at top, #2f334e, #151728);
     border-radius: 32px;
-    padding: 18px;
-    min-height: 600px;
+    padding: 24px;
+    min-height: 640px;
     color: white;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
 }
 .status-bar {
     display: flex;
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     {% if selected_contract %}
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div class="flex justify-center">
+        <div class="flex justify-center lg:justify-start">
             <div class="iphone-shell">
                 <div class="iphone-notch"></div>
                 <div class="iphone-screen">
@@ -223,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <button type="submit" class="phone-button phone-button--primary">Отправить тикет</button>
                         </form>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -234,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-xs uppercase text-gray-400">Абонент</p>
                         <p class="text-xl font-semibold text-gray-900">{{ selected_contract.customer.get_full_name }}</p>
                         <p class="text-sm text-gray-500">{{ selected_contract.tariff.name }}</p>
+                        <p class="text-sm text-gray-500">Email: {{ selected_contract.customer.email|default:"не указан" }}</p>
                     </div>
                     <div class="text-right">
                         <p class="text-xs uppercase text-gray-400">Баланс</p>
@@ -309,6 +311,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-sm text-gray-500">Тикетов пока нет.</p>
                         {% endfor %}
                     </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 space-y-4 animate-card animate-delay-2">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Сообщения</h3>
+                    <span class="text-sm text-gray-500">последние уведомления и операции</span>
+                </div>
+                <div class="space-y-3 max-h-80 overflow-y-auto">
+                    {% for entry in phone_logs %}
+                    <div class="text-sm">
+                        <p class="text-xs uppercase text-gray-400">{{ entry.timestamp }} · {{ entry.level|upper }}</p>
+                        <pre class="mt-1 rounded-2xl bg-gray-900 text-white/90 p-3 text-xs whitespace-pre-wrap">{{ entry.text }}</pre>
+                    </div>
+                    {% empty %}
+                    <p class="text-sm text-gray-500">Сообщений пока нет — выполните действие, чтобы увидеть ленту.</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>

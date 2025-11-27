@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Доступ запрещен{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-16">
+    <div class="glass-panel p-10 text-center space-y-6 animate-card">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 text-red-600 text-3xl font-bold">
+            403
+        </div>
+        <h1 class="text-3xl font-bold text-gray-900">Нет доступа</h1>
+        <p class="text-gray-600">
+            {{ description|default:"У вас недостаточно прав для просмотра этой страницы. Возможно, требуется другая роль или авторизация." }}
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="{% url 'home' %}" class="btn-gradient px-5 py-3 rounded-2xl text-white font-semibold">
+                Вернуться на главную
+            </a>
+            <a href="mailto:support@asman-crm.kg" class="rounded-2xl border px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                Связаться с поддержкой
+            </a>
+        </div>
+        <div class="text-xs text-gray-400">
+            Код ошибки: 403 · {{ request.path }}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,10 +7,44 @@
 - Push уведомлениями
 """
 import logging
-from typing import Optional
 from decimal import Decimal
+from collections import deque
+
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+# Храним последние уведомления, чтобы отображать их в интерфейсе
+NOTIFICATION_FEED = deque(maxlen=50)
+
+
+def add_notification_entry(channel: str, text: str, contract_id: int = None):
+    """
+    Добавляет текстовое уведомление в общий поток для отображения в UI.
+    """
+    NOTIFICATION_FEED.appendleft({
+        'channel': channel,
+        'text': text,
+        'timestamp': timezone.now(),
+        'contract_id': contract_id,
+    })
+
+
+def get_notification_feed(limit: int = 10):
+    """
+    Возвращает последние уведомления для отображения.
+    """
+    return list(NOTIFICATION_FEED)[:limit]
+
+
+def get_notifications_for_contract(contract_id: int, limit: int = 10):
+    """
+    Возвращает последние уведомления, относящиеся к конкретному договору.
+    """
+    if not contract_id:
+        return []
+    matched = [entry for entry in NOTIFICATION_FEED if entry.get('contract_id') == contract_id]
+    return matched[:limit]
 
 
 class NotificationService:
@@ -19,7 +53,7 @@ class NotificationService:
     """
 
     @staticmethod
-    def send_email(to_email: str, subject: str, body: str) -> bool:
+    def send_email(to_email: str, subject: str, body: str, contract_id: int = None) -> bool:
         """
         Отправка email уведомления.
 
@@ -34,15 +68,19 @@ class NotificationService:
         # Заглушка - в реальной системе здесь будет отправка через SMTP или API
         logger.info(f"[EMAIL] To: {to_email}, Subject: {subject}")
         logger.info(f"[EMAIL] Body: {body}")
-        print(f"\n--- EMAIL NOTIFICATION ---")
-        print(f"To: {to_email}")
-        print(f"Subject: {subject}")
-        print(f"Body:\n{body}")
-        print("--- END EMAIL ---\n")
+        notification_text = (
+            f"--- EMAIL NOTIFICATION ---\n"
+            f"To: {to_email}\n"
+            f"Subject: {subject}\n"
+            f"Body:\n{body}\n"
+            f"--- END EMAIL ---"
+        )
+        print(f"\n{notification_text}\n")
+        add_notification_entry('email', notification_text, contract_id=contract_id)
         return True
 
     @staticmethod
-    def send_sms(phone: str, message: str) -> bool:
+    def send_sms(phone: str, message: str, contract_id: int = None) -> bool:
         """
         Отправка SMS уведомления.
 
@@ -55,10 +93,14 @@ class NotificationService:
         """
         # Заглушка - в реальной системе здесь будет отправка через SMS API
         logger.info(f"[SMS] To: {phone}, Message: {message}")
-        print(f"\n--- SMS NOTIFICATION ---")
-        print(f"To: {phone}")
-        print(f"Message: {message}")
-        print("--- END SMS ---\n")
+        notification_text = (
+            f"--- SMS NOTIFICATION ---\n"
+            f"To: {phone}\n"
+            f"Message: {message}\n"
+            f"--- END SMS ---"
+        )
+        print(f"\n{notification_text}\n")
+        add_notification_entry('sms', notification_text, contract_id=contract_id)
         return True
 
 
@@ -99,12 +141,13 @@ class PaymentNotifications:
 С уважением,
 Команда ASMAN CRM
             """
-            NotificationService.send_email(customer.email, subject, body)
+            NotificationService.send_email(customer.email, subject, body, contract_id=contract.id)
 
         # SMS уведомление
-        if customer.phone:
+        sms_phone = getattr(contract.sim_card, 'msisdn', None) or customer.phone
+        if sms_phone:
             message = f"Платеж {payment.amount} c успешно зачислен. Баланс: {contract.balance} c. Договор {contract.number}"
-            NotificationService.send_sms(customer.phone, message)
+            NotificationService.send_sms(sms_phone, message, contract_id=contract.id)
 
     @staticmethod
     def notify_payment_failed(payment, reason: str = ''):
@@ -137,12 +180,13 @@ class PaymentNotifications:
 С уважением,
 Команда ASMAN CRM
             """
-            NotificationService.send_email(customer.email, subject, body)
+            NotificationService.send_email(customer.email, subject, body, contract_id=contract.id)
 
         # SMS уведомление
-        if customer.phone:
+        sms_phone = getattr(contract.sim_card, 'msisdn', None) or customer.phone
+        if sms_phone:
             message = f"Платеж {payment.amount} c отклонен. Договор {contract.number}. Свяжитесь с поддержкой."
-            NotificationService.send_sms(customer.phone, message)
+            NotificationService.send_sms(sms_phone, message, contract_id=contract.id)
 
 
 class ContractNotifications:
@@ -184,12 +228,13 @@ class ContractNotifications:
 С уважением,
 Команда ASMAN CRM
             """
-            NotificationService.send_email(customer.email, subject, body)
+            NotificationService.send_email(customer.email, subject, body, contract_id=contract.id)
 
         # SMS уведомление
-        if customer.phone:
+        sms_phone = getattr(contract.sim_card, 'msisdn', None) or customer.phone
+        if sms_phone:
             message = f"Низкий баланс: {contract.balance} c. Договор {contract.number}. Пополните баланс."
-            NotificationService.send_sms(customer.phone, message)
+            NotificationService.send_sms(sms_phone, message, contract_id=contract.id)
 
     @staticmethod
     def notify_contract_suspended(contract, reason: str = ''):
@@ -223,12 +268,13 @@ class ContractNotifications:
 С уважением,
 Команда ASMAN CRM
             """
-            NotificationService.send_email(customer.email, subject, body)
+            NotificationService.send_email(customer.email, subject, body, contract_id=contract.id)
 
         # SMS уведомление
-        if customer.phone:
+        sms_phone = getattr(contract.sim_card, 'msisdn', None) or customer.phone
+        if sms_phone:
             message = f"Договор {contract.number} приостановлен. Баланс: {contract.balance} c. Пополните для возобновления."
-            NotificationService.send_sms(customer.phone, message)
+            NotificationService.send_sms(sms_phone, message, contract_id=contract.id)
 
     @staticmethod
     def notify_contract_resumed(contract):
@@ -257,12 +303,13 @@ class ContractNotifications:
 С уважением,
 Команда ASMAN CRM
             """
-            NotificationService.send_email(customer.email, subject, body)
+            NotificationService.send_email(customer.email, subject, body, contract_id=contract.id)
 
         # SMS уведомление
-        if customer.phone:
+        sms_phone = getattr(contract.sim_card, 'msisdn', None) or customer.phone
+        if sms_phone:
             message = f"Договор {contract.number} возобновлен. Баланс: {contract.balance} c. Услуги доступны."
-            NotificationService.send_sms(customer.phone, message)
+            NotificationService.send_sms(sms_phone, message, contract_id=contract.id)
 
     @staticmethod
     def notify_monthly_charge(contract, amount: Decimal):
@@ -293,12 +340,13 @@ class ContractNotifications:
 С уважением,
 Команда ASMAN CRM
             """
-            NotificationService.send_email(customer.email, subject, body)
+            NotificationService.send_email(customer.email, subject, body, contract_id=contract.id)
 
         # SMS уведомление (отправляем только если баланс стал низким)
-        if customer.phone and contract.balance < 100:
+        sms_phone = getattr(contract.sim_card, 'msisdn', None) or customer.phone
+        if sms_phone and contract.balance < 100:
             message = f"Списано {amount} c. Баланс: {contract.balance} c. Договор {contract.number}"
-            NotificationService.send_sms(customer.phone, message)
+            NotificationService.send_sms(sms_phone, message, contract_id=contract.id)
 
 
 # Функции-хелперы для быстрого использования

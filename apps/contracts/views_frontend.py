@@ -9,6 +9,7 @@ from django.urls import reverse_lazy, reverse
 from django.shortcuts import redirect, get_object_or_404
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.utils import timezone
 
 from apps.contracts.models import Contract, TrafficMetric
 from apps.contracts.forms import TrafficEmulatorForm
@@ -16,6 +17,7 @@ from apps.contracts.services.traffic_emulator import TrafficEmulator, EmulatorCo
 from apps.payments.models import Payment
 from apps.tickets.models import Ticket
 from apps.users.permissions import RoleRequiredMixin
+from apps.payments.notifications import get_notifications_for_contract
 
 
 class ContractListView(ListView):
@@ -117,6 +119,7 @@ class TrafficEmulatorView(RoleRequiredMixin, FormView):
 class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
     template_name = 'contracts/phone_emulator.html'
     allowed_roles = ['admin', 'operator', 'supervisor']
+    LOG_SESSION_KEY = 'phone_emulator_log'
 
     def get_contract_queryset(self):
         if not hasattr(self, '_contracts_qs'):
@@ -157,6 +160,7 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
                 'data': tariff.data_gb_overage_cost or Decimal('100.00'),
                 'sms': tariff.sms_overage_cost or Decimal('1.00'),
             }
+            context['phone_logs'] = self._get_phone_logs(selected_contract.id)
         else:
             context['recent_payments'] = []
             context['recent_tickets'] = []
@@ -165,6 +169,7 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
                 'data': Decimal('0.00'),
                 'sms': Decimal('0.00'),
             }
+            context['phone_logs'] = []
         return context
 
     def post(self, request, *args, **kwargs):
@@ -220,6 +225,11 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
             request,
             f'Совершён звонок {duration} мин. Списано {amount} с. Текущий баланс: {contract.balance} с.'
         )
+        self._append_phone_log(
+            contract,
+            f'Звонок {duration} мин на {destination}. Списано {amount} с. Баланс {contract.balance} с.',
+            level='success'
+        )
 
     def _handle_data(self, contract):
         request = self.request
@@ -254,6 +264,11 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
         messages.success(
             request,
             f'Израсходовано {data_mb} МБ трафика. Списано {amount} с. Баланс: {contract.balance} с.'
+        )
+        self._append_phone_log(
+            contract,
+            f'Интернет {data_mb} МБ ({data_gb} ГБ). Списано {amount} с. Баланс {contract.balance} с.',
+            level='info'
         )
 
     def _handle_sms(self, contract):
@@ -292,6 +307,11 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
             request,
             f'Отправлено {count} SMS. Списано {amount} с. Баланс: {contract.balance} с.'
         )
+        self._append_phone_log(
+            contract,
+            f'SMS x{count} на {destination}. Списано {amount} с. Баланс {contract.balance} с.',
+            level='info'
+        )
 
     def _handle_ticket(self, contract):
         request = self.request
@@ -313,6 +333,53 @@ class PhoneEmulatorView(RoleRequiredMixin, TemplateView):
             request,
             f'Создан тикет #{ticket.id}: "{ticket.subject}". Сотрудники поддержки получили уведомление.'
         )
+        self._append_phone_log(
+            contract,
+            f'Создан тикет #{ticket.id} с темой «{ticket.subject}».',
+            level='success'
+        )
+
+    def _append_phone_log(self, contract, text, level='info'):
+        """
+        Сохраняет короткое сообщение об операции эмулятора в сессии,
+        чтобы отобразить его в интерфейсе телефона.
+        """
+        if not contract:
+            return
+        log = self.request.session.get(self.LOG_SESSION_KEY, [])
+        now = timezone.now()
+        log.insert(0, {
+            'contract_id': contract.id,
+            'text': text,
+            'level': level,
+            'timestamp': now.strftime('%d.%m %H:%M:%S'),
+            'sort_key': now.timestamp(),
+        })
+        self.request.session[self.LOG_SESSION_KEY] = log[:15]
+        self.request.session.modified = True
+
+    def _get_phone_logs(self, contract_id):
+        """
+        Возвращает ленту сообщений для выбранного договора (не более 10).
+        """
+        log = self.request.session.get(self.LOG_SESSION_KEY, [])
+        session_entries = [
+            entry for entry in log
+            if entry.get('contract_id') == contract_id
+        ]
+        notification_entries = []
+        for item in get_notifications_for_contract(contract_id, limit=10):
+            notification_entries.append({
+                'contract_id': contract_id,
+                'text': item['text'],
+                'level': 'notice',
+                'timestamp': item['timestamp'].strftime('%d.%m %H:%M:%S'),
+                'sort_key': item['timestamp'].timestamp(),
+            })
+
+        combined = session_entries + notification_entries
+        combined.sort(key=lambda entry: entry.get('sort_key', 0), reverse=True)
+        return combined[:10]
 
 
 class TrafficEmulatorLiveView(RoleRequiredMixin, View):
